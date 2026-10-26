@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { CRMNotifications } from "@/components/crm/CRMNotifications";
+import { getCRMAlerts } from "@/lib/crm-notifications";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip,
@@ -109,6 +111,7 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
     <Button className="mt-4" onClick={()=>q.refetch()}>Tentar novamente</Button>
   </div>;
   const {leads,visits,deals,team,properties,settings,seats}=q.data;
+  const notifications=getCRMAlerts({leads,deals,visits});
   const metrics=crmMetrics(leads,deals,visits);
   const chartData=revenueByMonth(deals);
   const plan=settings?.plan??"essencial",limit=settings?.max_users??3;
@@ -145,6 +148,7 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
       budget_brl:leadDraft.budget_brl==null?null:Number(leadDraft.budget_brl),
       next_contact_at:leadDraft.next_contact_at||null,
       notes:leadDraft.notes??"",
+      birth_date:leadDraft.birth_date||null,
     };
     const ok=await run(()=>leadDraft.id?
       supabase.from("crm_leads").update(body).eq("id",leadDraft.id).eq("agency_id",agencyId):
@@ -208,6 +212,15 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
         </Button>
       </div>
     </div>
+    <CRMNotifications key={agencyId} agencyName={agencyName} alerts={notifications} leads={leads}
+      onOpen={alert=>{
+        if(alert.target==="leads") {
+          setTab("leads");
+          const selected=leads.find(lead=>lead.id===alert.leadId);
+          if(selected)setLeadDraft({...selected});
+        } else if(alert.target==="negociacoes")setTab("negociacoes");
+        else setTab("visitas");
+      }}/>
     <nav aria-label="Áreas do CRM" className="flex flex-wrap gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm">
       {tabs.filter(t=>!isBroker||t.key!=="equipe").map(({key,label,icon:Icon})=>
         <button key={key} type="button" onClick={()=>setTab(key)}
@@ -407,6 +420,11 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Telefone / WhatsApp"><Input value={leadDraft.phone??""} onChange={e=>setLeadDraft({...leadDraft,phone:e.target.value})}/></Field>
           <Field label="E-mail"><Input type="email" value={leadDraft.email??""} onChange={e=>setLeadDraft({...leadDraft,email:e.target.value})}/></Field>
+          <Field label="Data de nascimento (opcional)">
+            <Input type="date" value={leadDraft.birth_date??""}
+              onChange={e=>setLeadDraft({...leadDraft,birth_date:e.target.value||null})}/>
+            <p className="mt-1 text-xs text-muted-foreground">Usada somente para lembretes internos de aniversário.</p>
+          </Field>
           <Field label="Origem"><select className={fieldStyle} value={leadDraft.source??"manual"} onChange={e=>setLeadDraft({...leadDraft,source:e.target.value as Lead["source"]})}>{Object.entries(SOURCES).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></Field>
           <Field label="Etapa"><select className={fieldStyle} value={leadDraft.stage??"novo"} onChange={e=>setLeadDraft({...leadDraft,stage:e.target.value as LeadStage})}>{LEAD_STAGES.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
           <Field label="Imóvel de interesse"><select className={fieldStyle} value={leadDraft.property_id??""} onChange={e=>setLeadDraft({...leadDraft,property_id:e.target.value||null})}><option value="">Não definido</option>{properties.map(p=><option key={p.id} value={p.id}>{p.title}</option>)}</select></Field>

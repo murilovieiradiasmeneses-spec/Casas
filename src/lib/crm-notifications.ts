@@ -24,7 +24,7 @@ function dayDifference(date: Date, now: Date) {
   return dayNumber(date) - dayNumber(now);
 }
 function calendarDate(date: string): Date | null {
-  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(date);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
   if (!match) return null;
   const year = Number(match[1]), month = Number(match[2]), day = Number(match[3]);
   const candidate = new Date(year, month - 1, day);
