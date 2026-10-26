@@ -361,6 +361,10 @@ export type Database = {
           parking: number
           price: number
           property_type: string
+          is_off_plan: boolean
+          price_display_type: "price" | "income_range" | "consultation"
+          income_min: number | null
+          income_max: number | null
           published: boolean
           purpose: string
           show_address: boolean
@@ -393,6 +397,10 @@ export type Database = {
           parking?: number
           price: number
           property_type: string
+          is_off_plan?: boolean
+          price_display_type?: "price" | "income_range" | "consultation"
+          income_min?: number | null
+          income_max?: number | null
           published?: boolean
           purpose: string
           show_address?: boolean
@@ -425,6 +433,10 @@ export type Database = {
           parking?: number
           price?: number
           property_type?: string
+          is_off_plan?: boolean
+          price_display_type?: "price" | "income_range" | "consultation"
+          income_min?: number | null
+          income_max?: number | null
           published?: boolean
           purpose?: string
           show_address?: boolean
@@ -504,6 +516,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      crm_create_broker_invite: { Args: { _agency: string; _email: string; _name: string }; Returns: string }
+      crm_invite_details: { Args: { _token: string }; Returns: { agency_name: string; email: string; broker_name: string; expires_at: string }[] }
+      crm_redeem_broker_invite: { Args: { _token: string }; Returns: boolean }
       crm_capture_interest: { Args: { _property_id: string; _name: string; _phone: string; _email?: string | null }; Returns: boolean }
       crm_assign_salesperson: { Args: { _agency: string; _email: string; _name: string }; Returns: string }
       crm_toggle_salesperson: { Args: { _agent: string; _active: boolean }; Returns: undefined }

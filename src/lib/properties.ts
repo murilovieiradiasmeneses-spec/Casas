@@ -27,6 +27,25 @@ export function formatPrice(value: number | string, purpose?: string) {
   return purpose === "locacao" ? `${s}/mês` : s;
 }
 
+export function formatListingPrice(p: Pick<Property,"price"|"purpose"|"price_display_type"|"income_min"|"income_max">) {
+  if (p.price_display_type === "consultation") return "Sob consulta";
+  if (p.price_display_type === "income_range") {
+    const c=(n:number)=>n.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
+    return p.income_min!=null && p.income_max!=null
+      ? "Renda familiar: "+c(p.income_min)+" a "+c(p.income_max)+"/mês"
+      : "Faixa de renda sob consulta";
+  }
+  return formatPrice(p.price,p.purpose);
+}
+export function shortListingPrice(p: Pick<Property,"price"|"price_display_type">) {
+  if(p.price_display_type === "consultation") return "Consulte";
+  if(p.price_display_type === "income_range") return "Por renda";
+  const n=Number(p.price);
+  if(n>=1e6)return "R$ "+(n/1e6).toFixed(1).replace(".",",")+" mi";
+  if(n>=1000)return "R$ "+Math.round(n/1000)+" mil";
+  return "R$ "+n;
+}
+
 export function slugify(text: string) {
   return text
     .normalize("NFD")
@@ -61,6 +80,7 @@ export type Filters = {
   minPrice?: number;
   maxPrice?: number;
   bedrooms?: number;
+  offPlan?: boolean;
 };
 
 export function parseFilters(search: Record<string, unknown>): Filters {
@@ -78,6 +98,7 @@ export function parseFilters(search: Record<string, unknown>): Filters {
     minPrice: num(search.minPrice),
     maxPrice: num(search.maxPrice),
     bedrooms: num(search.bedrooms),
+    offPlan: search.offPlan === true || search.offPlan === "true" ? true : undefined,
   };
 }
 
@@ -89,7 +110,9 @@ export async function fetchPublished(f: Filters = {}, opts: { featuredOnly?: boo
     q = q.or(`city.ilike.%${term}%,neighborhood.ilike.%${term}%`);
   }
   if (f.type) q = q.eq("property_type", f.type);
+  if (f.offPlan) q = q.eq("is_off_plan", true);
   if (f.purpose) q = q.eq("purpose", f.purpose);
+  if (f.minPrice || f.maxPrice) q = q.eq("price_display_type","price");
   if (f.minPrice) q = q.gte("price", f.minPrice);
   if (f.maxPrice) q = q.lte("price", f.maxPrice);
   if (f.bedrooms) q = q.gte("bedrooms", f.bedrooms);

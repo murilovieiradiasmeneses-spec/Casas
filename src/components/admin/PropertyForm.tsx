@@ -23,7 +23,11 @@ const toValues = (p?: Property): Values => ({
   property_type: p?.property_type ?? "casa",
   purpose: p?.purpose ?? "venda",
   status: p?.status ?? "disponivel",
-  price: p ? String(p.price) : "",
+  price: p && p.price_display_type==="price" ? String(p.price) : "",
+  is_off_plan: p?.is_off_plan ?? false,
+  price_display_type: p?.price_display_type ?? "price",
+  income_min: p?.income_min != null ? String(p.income_min) : "",
+  income_max: p?.income_max != null ? String(p.income_max) : "",
   bedrooms: String(p?.bedrooms ?? 0),
   suites: String(p?.suites ?? 0),
   bathrooms: String(p?.bathrooms ?? 0),
@@ -71,6 +75,9 @@ export function PropertyForm({ initial, manageBase = "/admin" }: { initial?: Pro
     e.preventDefault();
     const raw = {
       ...v,
+      price: v.price_display_type==="price"?v.price:"0",
+      income_min: v.price_display_type==="income_range"?v.income_min:"",
+      income_max: v.price_display_type==="income_range"?v.income_max:"",
       slug: v.slug || slugify(String(v.title)),
       address: String(v.address).trim() || null,
       features: String(v.features).split(",").map((s) => s.trim()).filter(Boolean),
@@ -136,8 +143,32 @@ export function PropertyForm({ initial, manageBase = "/admin" }: { initial?: Pro
           {select("property_type", "Tipo", [["casa", "Casa"], ["apartamento", "Apartamento"], ["terreno", "Terreno"]])}
           {select("purpose", "Finalidade", [["venda", "Venda"], ["locacao", "Locação"]])}
           {select("status", "Status", Object.entries(STATUS_LABEL))}
-          {field("price", "Preço (R$)", { type: "number", min: 0, step: "0.01" })}
+          {select("price_display_type", "Valor no anúncio", [
+            ["price","Preço definido"],["income_range","Faixa de renda"],["consultation","Sob consulta"],
+          ])}
         </div>
+        <div className="rounded-xl border bg-secondary/30 p-4">
+          <label className="flex items-center gap-3 text-sm font-semibold">
+            <Switch checked={!!v.is_off_plan} onCheckedChange={value=>set("is_off_plan",value)}/>
+            Imóvel na planta / lançamento
+          </label>
+          <p className="mt-2 text-xs text-muted-foreground">O anúncio será destacado como "Na planta".</p>
+        </div>
+        {v.price_display_type==="price"&&<div className="max-w-md">
+          {field("price","Preço anunciado (R$)",{type:"number",min:0.01,step:"0.01",placeholder:"350000"})}
+        </div>}
+        {v.price_display_type==="income_range"&&<div className="rounded-xl border bg-card p-4">
+          <p className="mb-3 text-sm font-semibold">Faixa de renda familiar mensal</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {field("income_min","Renda mínima (R$/mês)",{type:"number",min:1,step:"0.01",placeholder:"2500"})}
+            {field("income_max","Renda máxima (R$/mês)",{type:"number",min:1,step:"0.01",placeholder:"5000"})}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">A renda exibida não representa o preço do imóvel. A aprovação depende das condições do financiamento.</p>
+        </div>}
+        {v.price_display_type==="consultation"&&<p className="rounded-xl border bg-secondary/40 p-4 text-sm">
+          O anúncio mostrará "Sob consulta" no lugar do preço.
+        </p>}
+        {errors.price_display_type&&<p className="text-sm text-destructive">{errors.price_display_type}</p>}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
           {field("bedrooms", "Quartos", { type: "number", min: 0 })}
           {field("suites", "Suítes", { type: "number", min: 0 })}

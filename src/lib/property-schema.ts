@@ -11,7 +11,11 @@ export const propertySchema = z
     property_type: z.enum(["casa", "apartamento", "terreno"]),
     purpose: z.enum(["venda", "locacao"]),
     status: z.enum(["disponivel", "reservado", "vendido", "alugado"]),
-    price: z.coerce.number({ invalid_type_error: "Informe o preço" }).positive("Informe o preço"),
+    is_off_plan: z.boolean(),
+    price_display_type: z.enum(["price","income_range","consultation"]),
+    price: z.coerce.number({ invalid_type_error: "Informe o preço" }).min(0,"Preço inválido"),
+    income_min: z.preprocess(v=>v===""||v==null?null:v,z.coerce.number().positive().nullable()),
+    income_max: z.preprocess(v=>v===""||v==null?null:v,z.coerce.number().positive().nullable()),
     bedrooms: int,
     suites: int,
     bathrooms: int,
@@ -31,6 +35,11 @@ export const propertySchema = z
     published: z.boolean(),
     whatsapp: z.preprocess((v) => (v === "" ? null : v), z.string().regex(/^\+?\d[\d\s()-]{9,}$/, "WhatsApp inválido").nullable()),
   })
+  .refine((d) =>
+  d.price_display_type === "price" ? d.price > 0 && d.income_min===null && d.income_max===null :
+  d.price_display_type === "consultation" ? d.price===0 && d.income_min===null && d.income_max===null :
+  d.price===0 && d.income_min!==null && d.income_max!==null && d.income_max >= d.income_min,
+  {path:["price_display_type"],message:"Defina o preço, a faixa de renda ou selecione Sob consulta"})
   .refine((d) => d.suites <= d.bedrooms, { path: ["suites"], message: "Suítes não podem exceder quartos" })
   .refine((d) => !d.published || (d.latitude != null && d.longitude != null), {
     path: ["latitude"],
