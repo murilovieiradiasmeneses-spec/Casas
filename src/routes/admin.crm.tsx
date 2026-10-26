@@ -8,5 +8,5 @@ export const Route = createFileRoute("/admin/crm")({
 });
 function MasterCRM(){
   const {activeAgencyId,agencies,isPlatformAdmin}=useAdminAgency();
-  return <CRMWorkspace key={activeAgencyId} agencyId={activeAgencyId} agencyName={agencies.find(a=>a.id===activeAgencyId)?.name??"Imobiliária"} isMaster={isPlatformAdmin}/>;
+  return <CRMWorkspace key={activeAgencyId} agencyId={activeAgencyId} agencyName={agencies.find(a=>a.id===activeAgencyId)?.name??"Imobiliária"} agencySlug={agencies.find(a=>a.id===activeAgencyId)?.slug??""} isMaster={isPlatformAdmin}/>;
 }

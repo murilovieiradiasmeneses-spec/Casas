@@ -849,6 +849,11 @@ export type Database = {
       }
     }
     Functions: {
+      crm_authorize_broker: { Args: { _agency: string; _email: string; _name: string }; Returns: string }
+      crm_activate_authorized_broker: { Args: { _agency: string }; Returns: boolean }
+      crm_list_authorized_brokers: { Args: { _agency: string }; Returns: { id: string; name: string; email: string; state: string; authorized_at: string; activated_at: string | null }[] }
+      crm_revoke_broker: { Args: { _agency: string; _email: string }; Returns: boolean }
+      crm_reserved_seats: { Args: { _agency: string }; Returns: number }
       assign_agency_member: {
         Args: { _agency_id: string; _email: string; _role: string }
         Returns: string

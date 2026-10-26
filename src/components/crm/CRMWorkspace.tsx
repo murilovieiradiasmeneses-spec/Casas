@@ -423,39 +423,49 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
           </div>:<p className="mt-4 text-xs text-muted-foreground">Para aumentar seu limite, solicite a evolução do plano ao administrador do CASAS pelo WhatsApp.</p>}
         </article>
         <article className={panel}>
-          <div className="flex items-center gap-3"><UserPlus className="h-5 w-5 text-primary"/><h4 className="text-lg">Convidar corretor</h4></div>
-          <p className="mt-3 text-xs text-muted-foreground">Informe nome e e-mail, gere um convite e envie pelo WhatsApp. O corretor criará sua própria senha sem precisar de cadastro no Cloud. Convites duram 7 dias e respeitam o plano.</p>
-          <form onSubmit={addAgent} className="mt-4 space-y-3">
-            <div><Label htmlFor="crm-agent-name">Nome do corretor</Label><Input id="crm-agent-name" value={agentName} onChange={e=>setAgentName(e.target.value)} required/></div>
-            <div><Label htmlFor="crm-agent-email">E-mail que receberá o convite</Label><Input id="crm-agent-email" type="email" value={agentEmail} onChange={e=>setAgentEmail(e.target.value)} required/></div>
-            <Button type="submit" disabled={busy||seats>=limit}><Plus/> {busy?"Gerando...":"Gerar convite de acesso"}</Button>
-          </form>
-          {inviteLink&&<div className="mt-4 rounded-xl border border-primary/30 bg-secondary/50 p-4">
-            <p className="text-sm font-semibold">Link do convite criado!</p>
-            <p className="mt-1 text-xs text-muted-foreground">Envie apenas ao corretor convidado. O link expira em 7 dias e é válido para um único acesso.</p>
-            <p className="mt-2 break-all rounded-lg bg-card p-3 text-xs">{inviteLink}</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button size="sm" type="button" onClick={async()=>{
-                try{await navigator.clipboard.writeText(inviteLink);toast.success("Link copiado.");}
-                catch{toast.info("Selecione e copie o link exibido.");}
-              }}>Copiar convite</Button>
-              <Button size="sm" variant="outline" asChild>
-                <a href={"https://wa.me/?text="+encodeURIComponent("Olá! Segue seu convite para acessar o CRM CASAS como corretor: "+inviteLink)}
-                  target="_blank" rel="noopener noreferrer">Enviar pelo WhatsApp</a>
-              </Button>
+          <div className="flex items-center gap-3"><UserPlus className="h-5 w-5 text-primary"/><h4 className="text-lg">Autorizar corretor</h4></div>
+          <p className="mt-3 text-sm text-muted-foreground">
+            O proprietário libera um e-mail diretamente. O corretor usa o link fixo desta imobiliária e cria a própria senha.
+          </p>
+          {canManageTeam?<>
+            <form onSubmit={addAgent} className="mt-4 space-y-3">
+              <div><Label htmlFor="crm-agent-name">Nome do corretor</Label><Input id="crm-agent-name" value={agentName} onChange={e=>setAgentName(e.target.value)} required/></div>
+              <div><Label htmlFor="crm-agent-email">E-mail autorizado</Label><Input id="crm-agent-email" type="email" value={agentEmail} onChange={e=>setAgentEmail(e.target.value)} required/></div>
+              <Button type="submit" disabled={busy||seatsReserved>=limit}><Plus/> {busy?"Autorizando...":"Autorizar acesso direto"}</Button>
+            </form>
+            <div className="mt-5 rounded-2xl border border-primary/25 bg-secondary/40 p-4">
+              <p className="font-semibold">Link fixo para os corretores</p>
+              <p className="mt-1 text-xs text-muted-foreground">Pode enviá-lo a todos os corretores autorizados desta imobiliária. Somente o e-mail aprovado ativa uma conta.</p>
+              <p className="mt-3 break-all rounded-lg bg-card p-3 text-xs">{brokerAccessUrl}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={async()=>{
+                  try{await navigator.clipboard.writeText(brokerAccessUrl);toast.success("Link copiado.");}
+                  catch{toast.info("Copie o link acima.");}
+                }}>Copiar link</Button>
+                <Button type="button" variant="outline" size="sm" asChild>
+                  <a href={"https://wa.me/?text="+encodeURIComponent("Olá! Seu acesso ao CRM foi autorizado. Entre com seu e-mail por este link: "+brokerAccessUrl)}
+                     target="_blank" rel="noopener noreferrer">Enviar pelo WhatsApp</a>
+                </Button>
+              </div>
             </div>
-          </div>}
+          </>:<p className="mt-4 rounded-xl border p-3 text-sm text-muted-foreground">Somente o proprietário da imobiliária e o administrador master podem liberar corretores.</p>}
         </article>
       </div>
       <article className={panel}>
         <h4 className="mb-4 text-xl">Equipe vinculada</h4>
+        {canManageTeam&&authorizations.filter(a=>a.state!=="ativo").map(a=><div key={a.id} className="flex flex-wrap items-center gap-3 border-b border-border/70 py-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-900">{a.name.slice(0,1).toUpperCase()}</div>
+          <div className="min-w-0 flex-1"><p className="font-semibold">{a.name}</p><p className="text-xs text-muted-foreground">{a.email}</p></div>
+          <span className="text-xs text-muted-foreground">{a.state==="revogado"?"Revogado":"Autorizado · aguardando cadastro"}</span>
+          {a.state!=="revogado"&&<Button variant="outline" size="sm" disabled={busy} onClick={()=>void revokeAuthorization(a.email)}>Revogar</Button>}
+        </div>)}
         {team.length?team.map(p=><div key={p.id} className="flex flex-wrap items-center gap-3 border-b border-border/70 py-4 last:border-b-0">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-secondary font-bold text-primary">{p.name.slice(0,1).toUpperCase()}</div>
           <div className="min-w-0 flex-1"><p className="font-semibold">{p.name}</p><p className="text-xs text-muted-foreground">{p.email}</p></div>
           <span className="text-sm text-muted-foreground">{p.active?"Ativo":"Desativado"}</span>
-          <Button size="sm" variant="outline" disabled={busy} onClick={()=>void run(()=>supabase.rpc("crm_toggle_salesperson",{_agent:p.id,_active:!p.active}),"Acesso do corretor atualizado.")}>
+          {canManageTeam&&<Button size="sm" variant="outline" disabled={busy} onClick={()=>void run(()=>supabase.rpc("crm_toggle_salesperson",{_agent:p.id,_active:!p.active}),"Acesso do corretor atualizado.")}>
             {p.active?"Desativar":"Reativar"}
-          </Button>
+          </Button>}
         </div>):<p className="text-sm text-muted-foreground">Nenhum corretor cadastrado.</p>}
       </article>
     </div>}
