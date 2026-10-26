@@ -68,7 +68,7 @@ function Clients() {
   if (!isPlatformAdmin) return <div className="rounded-xl border p-8">Apenas o administrador geral pode cadastrar empresas ou gerenciar acessos.</div>;
   return (
     <div className="space-y-8">
-      <div><p className="text-xs font-bold uppercase tracking-widest text-primary">Administração geral</p><h1 className="mt-2 text-4xl">Clientes white-label</h1><p className="mt-2 text-sm text-muted-foreground">Cadastre imobiliárias ou construtoras e controle o acesso de cada empresa, sem misturar imóveis e identidades.</p></div>
+      <div><p className="text-xs font-bold uppercase tracking-widest text-primary">Administração geral</p><h1 className="mt-2 text-4xl">Clientes white-label</h1><p className="mt-2 text-sm text-muted-foreground">Cadastre imobiliárias ou construtoras, controle acessos e personalize cada empresa. Os pagamentos são negociados diretamente com você no WhatsApp.</p></div>
       <div className="grid gap-6 lg:grid-cols-2">
         <form onSubmit={(e) => { e.preventDefault(); create.mutate(); }} className="space-y-4 rounded-xl border bg-card p-6">
           <h2 className="flex items-center gap-2 text-2xl"><Building2 className="h-5 w-5" /> Novo cliente</h2>
@@ -95,6 +95,7 @@ function Clients() {
               <span className={"rounded-full px-3 py-1 text-xs " + (a.active ? "bg-green-100 text-green-900" : "bg-red-100 text-red-800")}>{a.active ? "Ativo" : "Suspenso"}</span>
               <a href={"/v/" + a.slug} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">Vitrine <ExternalLink className="h-3 w-3" /></a>
               <Button size="sm" variant="outline" asChild><Link to="/admin/marca" onClick={() => setActiveAgencyId(a.id)}>Personalizar</Link></Button>
+              <Button size="sm" variant="outline" asChild><Link to="/admin/pagamentos">Pagamento</Link></Button>
               <Button size="sm" variant="outline" onClick={() => toggleActive.mutate({ id: a.id, active: !a.active })} disabled={toggleActive.isPending}>{a.active ? "Suspender" : "Ativar"}</Button>
             </div>
           ))}</div>}

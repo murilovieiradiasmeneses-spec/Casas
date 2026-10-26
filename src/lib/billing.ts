@@ -26,9 +26,9 @@ export function billingWhatsAppUrl(phone: string, company: string, date?: string
     ? date.split("-").reverse().join("/")
     : null;
   const message = readableDate
-    ? \`Olá! Tudo bem? Gostaria de conversar sobre o acesso da \${company} à plataforma CASAS, com vencimento em \${readableDate}.\`
-    : \`Olá! Tudo bem? Gostaria de conversar sobre o acesso da \${company} à plataforma CASAS.\`;
-  return \`https://wa.me/\${normalized}?text=\${encodeURIComponent(message)}\`;
+    ? `Olá! Tudo bem? Gostaria de conversar sobre o acesso da ${company} à plataforma CASAS, com vencimento em ${readableDate}.`
+    : `Olá! Tudo bem? Gostaria de conversar sobre o acesso da ${company} à plataforma CASAS.`;
+  return `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
 }
 
 export function moneyBRL(value: number) {

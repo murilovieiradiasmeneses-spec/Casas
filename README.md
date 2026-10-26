@@ -34,7 +34,7 @@ Anúncios despublicados e operações de gravação devem ser restritos pelas po
 
 ## Próximas etapas
 
-Criar marcas e painéis isolados por imobiliária/construtora, membros por empresa, logotipos/domínios individuais e, se desejado, planos comerciais e cobrança. Essas funções **não** fazem parte do MVP de administrador único.
+Criar marcas e painéis isolados por imobiliária/construtora, membros por empresa, logotipos/domínios individuais e um painel comercial manual para contratos negociados pelo WhatsApp. Essas funções **não** fazem parte do MVP de administrador único.
 
 
 ## White-label / multi-empresa (fase inicial)
@@ -54,3 +54,12 @@ Após a migração inicial, aplicar `drizzle/migrations/0001_whitelabel.sql` e `
 ### Domínios próprios
 
 O campo `custom_domain` é uma preparação; apontar DNS e exibir o site em domínio próprio requer confirmação de propriedade e roteamento seguro no hosting. Não aponte domínios para esta aplicação até a implementação de verificação.
+
+
+## Modelo comercial — pagamentos por WhatsApp
+
+O pagamento e a negociação **acontecem fora do sistema**, diretamente pelo WhatsApp com o responsável pela plataforma. Não há checkout, integração de pagamento ou cobrança automática. A área **/admin/pagamentos** permite registrar manualmente valor, periodicidade, vencimento, data do último pagamento confirmado, status, telefone para conversa e observações de cada cliente.
+
+Esses registros ficam em `agency_billing`, com acesso protegido por RLS e exclusivo do superadministrador. O botão abre o WhatsApp com mensagem sugerida, **sem enviar a mensagem automaticamente**. A situação financeira não suspende o acesso automaticamente; suspensões são feitas manualmente em `/admin/clientes`.
+
+**Ativação:** aplicar também a migração `drizzle/migrations/0004_manual_whatsapp_billing.sql` ao banco antes de abrir a tela. O código em GitHub não executa migrações sozinho.

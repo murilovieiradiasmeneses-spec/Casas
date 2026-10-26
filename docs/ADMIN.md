@@ -18,7 +18,9 @@ on conflict (user_id, role) do nothing;
 Aplique em ordem:
 1. `drizzle/migrations/0000_casas_schema.sql` (apenas se banco ainda não tiver a estrutura);
 2. `drizzle/migrations/0001_whitelabel.sql`;
-3. `drizzle/migrations/0002_tenant_guards.sql`.
+3. `drizzle/migrations/0002_tenant_guards.sql`;
+4. `drizzle/migrations/0003_tenant_public_security.sql`;
+5. `drizzle/migrations/0004_manual_whatsapp_billing.sql`.
 
 Confirme no banco que as tabelas `agencies`, `agency_members`, `properties` e as policies RLS existem. Confirme também buckets de imagens.
 
@@ -36,8 +38,19 @@ O primeiro script não deve ser executado duas vezes em banco já provisionado. 
 
 Para revogar uma conta, o superadmin pode excluir sua linha em `agency_members` via SQL Editor até criarmos gerenciamento de membros por tela.
 
-## 4. O que ainda falta para cobrar e lançar comercialmente
+## 4. Controle comercial manual via WhatsApp
 
-Os recursos de cobrança, planos, assinatura, pagamentos, domínios próprios e convite automático por email não foram integrados nesta fase. Também é preciso validar a separação das empresas, permissões e publicação em ambiente de testes antes de usar com clientes pagantes.
+Os clientes pagam diretamente ao responsável pela plataforma, em negociação conduzida no WhatsApp; **não existe checkout, link Pix gerado, cobrança automática nem confirmação bancária integrada**.
+
+- Em `/admin/pagamentos`, o administrador geral escolhe a empresa e registra o **valor combinado**, periodicidade (mensal, trimestral, anual ou único), próximo vencimento, último pagamento conferido e status (não definido, pendente, pago ou atrasado).
+- O cadastro privado também armazena o WhatsApp de cobrança do cliente e anotações internas.
+- O botão **Abrir WhatsApp** prepara uma conversa; nenhuma mensagem é enviada automaticamente.
+- O administrador altera o status financeiro **manualmente**, após confirmar o pagamento fora da plataforma.
+- A situação de pagamento **não ativa ou suspende automaticamente** o acesso. A suspensão é uma decisão manual feita em `/admin/clientes`.
+- RLS da tabela `agency_billing` permite leitura e edição **somente para o superadministrador**; imobiliárias não podem visualizar preço cobrado de outros clientes.
+
+## 5. O que ainda falta para lançamento comercial
+
+Não serão integrados gateways de pagamento nesta fase, pois a negociação e o recebimento serão realizados por WhatsApp. Domínios próprios e convite automático por email também não foram integrados. Também é preciso validar a separação das empresas, permissões e publicação em ambiente de testes antes de usar com clientes pagantes.
 
 O site compartilhado `/` continua como catálogo central da plataforma; os sites white-label ficam em `/v/<slug>`. Os anúncios públicos do catálogo central são uma opção de marketplace — revisar essa regra de negócio antes do lançamento.

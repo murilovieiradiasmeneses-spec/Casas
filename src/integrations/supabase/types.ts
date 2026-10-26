@@ -74,6 +74,48 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_billing: {
+        Row: {
+          agency_id: string
+          amount_brl: number
+          billing_frequency: "mensal" | "trimestral" | "anual" | "unico"
+          next_due_date: string | null
+          last_paid_date: string | null
+          payment_status: "nao_definido" | "pendente" | "pago" | "atrasado"
+          billing_whatsapp: string | null
+          notes: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          amount_brl?: number
+          billing_frequency?: "mensal" | "trimestral" | "anual" | "unico"
+          next_due_date?: string | null
+          last_paid_date?: string | null
+          payment_status?: "nao_definido" | "pendente" | "pago" | "atrasado"
+          billing_whatsapp?: string | null
+          notes?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          amount_brl?: number
+          billing_frequency?: "mensal" | "trimestral" | "anual" | "unico"
+          next_due_date?: string | null
+          last_paid_date?: string | null
+          payment_status?: "nao_definido" | "pendente" | "pago" | "atrasado"
+          billing_whatsapp?: string | null
+          notes?: string
+          updated_at?: string
+        }
+        Relationships: [{
+          foreignKeyName: "agency_billing_agency_id_fkey"
+          columns: ["agency_id"]
+          isOneToOne: true
+          referencedRelation: "agencies"
+          referencedColumns: ["id"]
+        }]
+      }
       agency_members: {
         Row: { agency_id: string; user_id: string; role: string; created_at: string }
         Insert: { agency_id: string; user_id: string; role: string; created_at?: string }

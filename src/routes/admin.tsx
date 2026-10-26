@@ -55,6 +55,7 @@ function AdminLayout() {
             <Link to="/admin/novo" className="text-sm hover:underline">Novo imóvel</Link>
             <Link to="/admin/marca" className="text-sm hover:underline">Identidade visual</Link>
             {q.data.isPlatformAdmin && <Link to="/admin/clientes" className="text-sm hover:underline">Meus clientes</Link>}
+            {q.data.isPlatformAdmin && <Link to="/admin/pagamentos" className="text-sm hover:underline">Pagamentos</Link>}
           </div>
           <div className="flex items-center gap-2">
             <span className="hidden text-xs text-muted-foreground lg:inline">{q.data.email}</span>
