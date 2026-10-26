@@ -849,6 +849,13 @@ export type Database = {
       }
     }
     Functions: {
+      master_change_agency_login: { Args: { _agency: string; _old_user: string; _new_email: string }; Returns: string }
+      activate_agency_login_change: { Args: { _agency: string }; Returns: boolean }
+      master_list_agency_login_changes: {
+        Args: Record<PropertyKey, never>
+        Returns: { id:string;agency_id:string;old_user_id:string;old_email:string;target_email:string;member_role:string;created_at:string;expires_at:string }[]
+      }
+      master_cancel_agency_login_change: { Args: { _id: string }; Returns: boolean }
       crm_authorize_broker: { Args: { _agency: string; _email: string; _name: string }; Returns: string }
       crm_activate_authorized_broker: { Args: { _agency: string }; Returns: boolean }
       crm_list_authorized_brokers: { Args: { _agency: string }; Returns: { id: string; name: string; email: string; state: string; authorized_at: string; activated_at: string | null }[] }
