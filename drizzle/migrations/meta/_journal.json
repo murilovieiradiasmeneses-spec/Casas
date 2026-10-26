@@ -8,6 +8,13 @@
       "when": 1793043012558,
       "tag": "0000_casas_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793047611267,
+      "tag": "0001_tighten_storage_reads",
+      "breakpoints": true
     }
   ]
 }
