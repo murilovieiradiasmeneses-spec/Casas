@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ClienteRouteImport } from './routes/cliente'
+import { Route as AcessoCorretorRouteImport } from './routes/acesso-corretor'
 import { Route as ConviteRouteImport } from './routes/convite'
 import { Route as CorretorRouteImport } from './routes/corretor'
 import { Route as EntrarRouteImport } from './routes/entrar'
@@ -22,12 +23,14 @@ import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminIdRouteImport } from './routes/admin.$id'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
+import { Route as AdminBackupRouteImport } from './routes/admin.backup'
 import { Route as AdminCrmRouteImport } from './routes/admin.crm'
 import { Route as AdminMarcaRouteImport } from './routes/admin.marca'
 import { Route as AdminNovoRouteImport } from './routes/admin.novo'
 import { Route as AdminPagamentosRouteImport } from './routes/admin.pagamentos'
 import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
 import { Route as ClienteIdRouteImport } from './routes/cliente.$id'
+import { Route as ClienteBackupRouteImport } from './routes/cliente.backup'
 import { Route as ClienteCrmRouteImport } from './routes/cliente.crm'
 import { Route as ClienteMarcaRouteImport } from './routes/cliente.marca'
 import { Route as ClienteNovoRouteImport } from './routes/cliente.novo'
@@ -49,6 +52,11 @@ const AdminRoute = AdminRouteImport.update({
 const ClienteRoute = ClienteRouteImport.update({
   id: '/cliente',
   path: '/cliente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcessoCorretorRoute = AcessoCorretorRouteImport.update({
+  id: '/acesso-corretor',
+  path: '/acesso-corretor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ConviteRoute = ConviteRouteImport.update({
@@ -101,6 +109,11 @@ const AdminClientesRoute = AdminClientesRouteImport.update({
   path: '/clientes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBackupRoute = AdminBackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCrmRoute = AdminCrmRouteImport.update({
   id: '/crm',
   path: '/crm',
@@ -129,6 +142,11 @@ const ClienteIndexRoute = ClienteIndexRouteImport.update({
 const ClienteIdRoute = ClienteIdRouteImport.update({
   id: '/$id',
   path: '/$id',
+  getParentRoute: () => ClienteRoute,
+} as any)
+const ClienteBackupRoute = ClienteBackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
   getParentRoute: () => ClienteRoute,
 } as any)
 const ClienteCrmRoute = ClienteCrmRouteImport.update({
@@ -171,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/cliente': typeof ClienteRouteWithChildren
+  '/acesso-corretor': typeof AcessoCorretorRoute
   '/convite': typeof ConviteRoute
   '/corretor': typeof CorretorRoute
   '/entrar': typeof EntrarRoute
@@ -180,11 +199,13 @@ export interface FileRoutesByFullPath {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/$id': typeof AdminIdRoute
   '/admin/clientes': typeof AdminClientesRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/crm': typeof AdminCrmRoute
   '/admin/marca': typeof AdminMarcaRoute
   '/admin/novo': typeof AdminNovoRoute
   '/admin/pagamentos': typeof AdminPagamentosRoute
   '/cliente/$id': typeof ClienteIdRoute
+  '/cliente/backup': typeof ClienteBackupRoute
   '/cliente/crm': typeof ClienteCrmRoute
   '/cliente/marca': typeof ClienteMarcaRoute
   '/cliente/novo': typeof ClienteNovoRoute
@@ -197,6 +218,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/acesso-corretor': typeof AcessoCorretorRoute
   '/convite': typeof ConviteRoute
   '/corretor': typeof CorretorRoute
   '/entrar': typeof EntrarRoute
@@ -206,11 +228,13 @@ export interface FileRoutesByTo {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/$id': typeof AdminIdRoute
   '/admin/clientes': typeof AdminClientesRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/crm': typeof AdminCrmRoute
   '/admin/marca': typeof AdminMarcaRoute
   '/admin/novo': typeof AdminNovoRoute
   '/admin/pagamentos': typeof AdminPagamentosRoute
   '/cliente/$id': typeof ClienteIdRoute
+  '/cliente/backup': typeof ClienteBackupRoute
   '/cliente/crm': typeof ClienteCrmRoute
   '/cliente/marca': typeof ClienteMarcaRoute
   '/cliente/novo': typeof ClienteNovoRoute
@@ -225,6 +249,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/cliente': typeof ClienteRouteWithChildren
+  '/acesso-corretor': typeof AcessoCorretorRoute
   '/convite': typeof ConviteRoute
   '/corretor': typeof CorretorRoute
   '/entrar': typeof EntrarRoute
@@ -234,11 +259,13 @@ export interface FileRoutesById {
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/admin/$id': typeof AdminIdRoute
   '/admin/clientes': typeof AdminClientesRoute
+  '/admin/backup': typeof AdminBackupRoute
   '/admin/crm': typeof AdminCrmRoute
   '/admin/marca': typeof AdminMarcaRoute
   '/admin/novo': typeof AdminNovoRoute
   '/admin/pagamentos': typeof AdminPagamentosRoute
   '/cliente/$id': typeof ClienteIdRoute
+  '/cliente/backup': typeof ClienteBackupRoute
   '/cliente/crm': typeof ClienteCrmRoute
   '/cliente/marca': typeof ClienteMarcaRoute
   '/cliente/novo': typeof ClienteNovoRoute
@@ -255,6 +282,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/cliente'
+    | '/acesso-corretor'
     | '/convite'
     | '/corretor'
     | '/entrar'
@@ -264,11 +292,13 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/admin/$id'
     | '/admin/clientes'
+    | '/admin/backup'
     | '/admin/crm'
     | '/admin/marca'
     | '/admin/novo'
     | '/admin/pagamentos'
     | '/cliente/$id'
+    | '/cliente/backup'
     | '/cliente/crm'
     | '/cliente/marca'
     | '/cliente/novo'
@@ -281,6 +311,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/acesso-corretor'
     | '/convite'
     | '/corretor'
     | '/entrar'
@@ -290,11 +321,13 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/admin/$id'
     | '/admin/clientes'
+    | '/admin/backup'
     | '/admin/crm'
     | '/admin/marca'
     | '/admin/novo'
     | '/admin/pagamentos'
     | '/cliente/$id'
+    | '/cliente/backup'
     | '/cliente/crm'
     | '/cliente/marca'
     | '/cliente/novo'
@@ -308,6 +341,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/cliente'
+    | '/acesso-corretor'
     | '/convite'
     | '/corretor'
     | '/entrar'
@@ -317,11 +351,13 @@ export interface FileRouteTypes {
     | '/redefinir-senha'
     | '/admin/$id'
     | '/admin/clientes'
+    | '/admin/backup'
     | '/admin/crm'
     | '/admin/marca'
     | '/admin/novo'
     | '/admin/pagamentos'
     | '/cliente/$id'
+    | '/cliente/backup'
     | '/cliente/crm'
     | '/cliente/marca'
     | '/cliente/novo'
@@ -337,6 +373,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   ClienteRoute: typeof ClienteRouteWithChildren
+  AcessoCorretorRoute: typeof AcessoCorretorRoute
   ConviteRoute: typeof ConviteRoute
   CorretorRoute: typeof CorretorRoute
   EntrarRoute: typeof EntrarRoute
@@ -369,6 +406,13 @@ declare module '@tanstack/react-router' {
       path: '/cliente'
       fullPath: '/cliente'
       preLoaderRoute: typeof ClienteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/acesso-corretor': {
+      id: '/acesso-corretor'
+      path: '/acesso-corretor'
+      fullPath: '/acesso-corretor'
+      preLoaderRoute: typeof AcessoCorretorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/convite': {
@@ -441,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClientesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/backup': {
+      id: '/admin/backup'
+      path: '/backup'
+      fullPath: '/admin/backup'
+      preLoaderRoute: typeof AdminBackupRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/crm': {
       id: '/admin/crm'
       path: '/crm'
@@ -481,6 +532,13 @@ declare module '@tanstack/react-router' {
       path: '/$id'
       fullPath: '/cliente/$id'
       preLoaderRoute: typeof ClienteIdRouteImport
+      parentRoute: typeof ClienteRoute
+    }
+    '/cliente/backup': {
+      id: '/cliente/backup'
+      path: '/backup'
+      fullPath: '/cliente/backup'
+      preLoaderRoute: typeof ClienteBackupRouteImport
       parentRoute: typeof ClienteRoute
     }
     '/cliente/crm': {
@@ -538,6 +596,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminIdRoute: typeof AdminIdRoute
   AdminClientesRoute: typeof AdminClientesRoute
+  AdminBackupRoute: typeof AdminBackupRoute
   AdminCrmRoute: typeof AdminCrmRoute
   AdminMarcaRoute: typeof AdminMarcaRoute
   AdminNovoRoute: typeof AdminNovoRoute
@@ -548,6 +607,7 @@ interface AdminRouteChildren {
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIdRoute: AdminIdRoute,
   AdminClientesRoute: AdminClientesRoute,
+  AdminBackupRoute: AdminBackupRoute,
   AdminCrmRoute: AdminCrmRoute,
   AdminMarcaRoute: AdminMarcaRoute,
   AdminNovoRoute: AdminNovoRoute,
@@ -559,6 +619,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ClienteRouteChildren {
   ClienteIdRoute: typeof ClienteIdRoute
+  ClienteBackupRoute: typeof ClienteBackupRoute
   ClienteCrmRoute: typeof ClienteCrmRoute
   ClienteMarcaRoute: typeof ClienteMarcaRoute
   ClienteNovoRoute: typeof ClienteNovoRoute
@@ -567,6 +628,7 @@ interface ClienteRouteChildren {
 
 const ClienteRouteChildren: ClienteRouteChildren = {
   ClienteIdRoute: ClienteIdRoute,
+  ClienteBackupRoute: ClienteBackupRoute,
   ClienteCrmRoute: ClienteCrmRoute,
   ClienteMarcaRoute: ClienteMarcaRoute,
   ClienteNovoRoute: ClienteNovoRoute,
@@ -594,6 +656,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ClienteRoute: ClienteRouteWithChildren,
+  AcessoCorretorRoute: AcessoCorretorRoute,
   ConviteRoute: ConviteRoute,
   CorretorRoute: CorretorRoute,
   EntrarRoute: EntrarRoute,
