@@ -50,3 +50,21 @@ Tabelas privadas `crm_leads`, `crm_visits`, `crm_deals` e `crm_salespeople` usam
 As páginas públicas de imóveis possuem um formulário **Solicitar contato**, que pede nome, WhatsApp, e-mail opcional e consentimento explícito. O envio usa RPC `crm_capture_interest`; nenhuma tabela privada é aberta ao público. O lead criado tem `source='site'`, vinculação ao imóvel e entra na coluna Novo lead, sem corretor atribuído. Um gerente pode encaminhar o lead a um corretor.
 
 Proteção inicial: validação do imóvel publicado, campos e antiduplicidade para mesmo telefone e imóvel por uma hora, mais campo antirrobô. Para produção de grande escala, incluir CAPTCHA/limite por IP em backend, política de privacidade e fluxo de exclusão de dados conforme LGPD. Migração: `0010_crm_public_interest.sql`.
+
+## Notificações ao entrar no CRM
+
+No carregamento inicial de qualquer CRM (**master**, **cliente** ou **corretor**), o sistema examina **somente os dados disponíveis para a sessão atual segundo o RLS** e abre automaticamente a central de notificações **quando há pendências**. Ela também pode ser aberta pelo botão **Ver notificações** no início da tela.
+
+São apresentados:
+- **Próximos contatos** do lead (campo `next_contact_at`) até os próximos 7 dias, incluindo atrasados. Leads ganhos ou perdidos não entram nesta categoria.
+- **Negociações** em proposta/negociação com prazo previsto (`expected_close_date`) até os próximos 7 dias ou já vencido.
+- **Visitas agendadas** nos próximos 7 dias ou que passaram e ainda constam agendadas.
+- **Aniversários** hoje e nos próximos 7 dias, desde que a **data de nascimento** tenha sido informada no cadastro de lead. Clientes perdidos não entram nos aniversários.
+
+Há indicadores de **Hoje / Amanhã / Atrasado / Em X dias**, botão para abrir a área correspondente e, para aniversários com telefone, um atalho **Parabenizar no WhatsApp**, que abre a conversa e preenche a mensagem, mas **não a envia automaticamente**.
+
+Caso não haja alertas, o CRM exibe discretamente **Tudo em dia por aqui** e não abre um modal automaticamente. Ao abrir de novo a rota, as pendências aparecem novamente; fechar a central não marca uma negociação ou visita como resolvida. Para remover avisos, atualize seus registros (ex.: visite, conclua, reagende ou atualize o próximo contato).
+
+**Privacidade:** `crm_leads.birth_date` é um campo opcional e permanece protegido pelas mesmas políticas RLS de cada carteira. A data de nascimento não é solicitada no formulário público de interesse e não é publicada no site. Recomenda-se registrar apenas com finalidade transparente e base legal apropriada, conforme LGPD.
+
+**Ativação:** executar `drizzle/migrations/0011_crm_lead_birthdays.sql` após as migrações anteriores. Os avisos são gerados **ao acessar a aplicação**: esta versão não envia push, SMS, e-mail ou mensagens de WhatsApp em segundo plano. Não há serviço de cron/automação configurado.
