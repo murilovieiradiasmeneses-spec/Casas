@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as ImoveisRouteImport } from './routes/imoveis'
+import { Route as MapaRouteImport } from './routes/mapa'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as ImovelSlugRouteImport } from './routes/imovel.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImoveisRoute = ImoveisRouteImport.update({
+  id: '/imoveis',
+  path: '/imoveis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapaRoute = MapaRouteImport.update({
+  id: '/mapa',
+  path: '/mapa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImovelSlugRoute = ImovelSlugRouteImport.update({
+  id: '/imovel/$slug',
+  path: '/imovel/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/entrar': typeof EntrarRoute
+  '/imoveis': typeof ImoveisRoute
+  '/mapa': typeof MapaRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/imovel/$slug': typeof ImovelSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/entrar': typeof EntrarRoute
+  '/imoveis': typeof ImoveisRoute
+  '/mapa': typeof MapaRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/imovel/$slug': typeof ImovelSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/entrar': typeof EntrarRoute
+  '/imoveis': typeof ImoveisRoute
+  '/mapa': typeof MapaRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/imovel/$slug': typeof ImovelSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/entrar'
+    | '/imoveis'
+    | '/mapa'
+    | '/redefinir-senha'
+    | '/imovel/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/entrar'
+    | '/imoveis'
+    | '/mapa'
+    | '/redefinir-senha'
+    | '/imovel/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/entrar'
+    | '/imoveis'
+    | '/mapa'
+    | '/redefinir-senha'
+    | '/imovel/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EntrarRoute: typeof EntrarRoute
+  ImoveisRoute: typeof ImoveisRoute
+  MapaRoute: typeof MapaRoute
+  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  ImovelSlugRoute: typeof ImovelSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imoveis': {
+      id: '/imoveis'
+      path: '/imoveis'
+      fullPath: '/imoveis'
+      preLoaderRoute: typeof ImoveisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mapa': {
+      id: '/mapa'
+      path: '/mapa'
+      fullPath: '/mapa'
+      preLoaderRoute: typeof MapaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imovel/$slug': {
+      id: '/imovel/$slug'
+      path: '/imovel/$slug'
+      fullPath: '/imovel/$slug'
+      preLoaderRoute: typeof ImovelSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EntrarRoute: EntrarRoute,
+  ImoveisRoute: ImoveisRoute,
+  MapaRoute: MapaRoute,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
+  ImovelSlugRoute: ImovelSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
