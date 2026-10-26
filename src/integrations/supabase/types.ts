@@ -31,6 +31,8 @@ export type Database = {
           primary_color: string
           secondary_color: string
           background_color: string
+          text_color: string
+          hero_text_color: string
           active: boolean
           custom_domain: string | null
         }
@@ -50,6 +52,8 @@ export type Database = {
           primary_color?: string
           secondary_color?: string
           background_color?: string
+          text_color?: string
+          hero_text_color?: string
           active?: boolean
           custom_domain?: string | null
         }
@@ -69,6 +73,8 @@ export type Database = {
           primary_color?: string
           secondary_color?: string
           background_color?: string
+          text_color?: string
+          hero_text_color?: string
           active?: boolean
           custom_domain?: string | null
         }

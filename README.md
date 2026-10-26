@@ -63,3 +63,10 @@ O pagamento e a negociação **acontecem fora do sistema**, diretamente pelo Wha
 Esses registros ficam em `agency_billing`, com acesso protegido por RLS e exclusivo do superadministrador. O botão abre o WhatsApp com mensagem sugerida, **sem enviar a mensagem automaticamente**. A situação financeira não suspende o acesso automaticamente; suspensões são feitas manualmente em `/admin/clientes`.
 
 **Ativação:** aplicar também a migração `drizzle/migrations/0004_manual_whatsapp_billing.sql` ao banco antes de abrir a tela. O código em GitHub não executa migrações sozinho.
+
+
+## Cor da fonte por imobiliária
+
+A área **Identidade visual** de cada empresa possui controles para **Cor da fonte (títulos e textos)** e **Cor da fonte sobre a imagem de capa**. Os valores ficam no registro da empresa em `agencies.text_color` e `agencies.hero_text_color`, são usados no tema da vitrine `/v/<slug>` e aparecem em prévia antes de salvar.
+
+Para ativar em bancos já existentes, aplicar a migração `drizzle/migrations/0006_typography_colors.sql`. As cores padrão preservam a aparência anterior das vitrines existentes.

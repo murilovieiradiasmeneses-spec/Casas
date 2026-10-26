@@ -17,5 +17,11 @@ export function brandingStyle(agency: Agency): CSSProperties {
     "--ring": agency.primary_color,
     "--charcoal": agency.secondary_color,
     "--background": agency.background_color,
+    "--foreground": agency.text_color,
+    "--card-foreground": agency.text_color,
+    "--popover-foreground": agency.text_color,
+    "--secondary-foreground": agency.text_color,
+    "--muted-foreground": `color-mix(in srgb, ${agency.text_color} 70%, ${agency.background_color})`,
+    "--hero-text": agency.hero_text_color,
   } as CSSProperties;
 }

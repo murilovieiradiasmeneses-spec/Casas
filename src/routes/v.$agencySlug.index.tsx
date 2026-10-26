@@ -50,10 +50,10 @@ function WhiteLabelStore() {
       <section className="relative isolate flex min-h-[540px] items-end overflow-hidden">
         <img src={agency.hero_url || hero} alt="Imóveis em destaque" className="absolute inset-0 -z-20 h-full w-full object-cover" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/45 to-black/10" />
-        <div className="mx-auto w-full max-w-7xl px-4 pb-12 pt-28 text-white md:px-8 md:pb-20">
+        <div className="mx-auto w-full max-w-7xl px-4 pb-12 pt-28 md:px-8 md:pb-20" style={{ color: "var(--hero-text)" }}>
           <p className="mb-3 text-xs font-semibold uppercase tracking-[.25em]">Bem-vindo à {agency.name}</p>
           <h1 className="max-w-3xl font-display text-5xl leading-[1.02] md:text-7xl">{agency.tagline}</h1>
-          <p className="mt-4 max-w-xl text-white/85">Encontre casas, apartamentos e terrenos com localização no mapa e contato direto.</p>
+          <p className="mt-4 max-w-xl opacity-85">Encontre casas, apartamentos e terrenos com localização no mapa e contato direto.</p>
           <a href="#imoveis" className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground">Explorar imóveis <ArrowRight className="h-4 w-4" /></a>
         </div>
       </section>
