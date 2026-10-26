@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip,
@@ -6,7 +6,7 @@ import {
 } from "recharts";
 import {
   ArrowUpRight, CalendarDays, ChartNoAxesCombined, CircleDollarSign,
-  ClipboardList, Handshake, KanbanSquare, MessageCircle, Plus, Users,
+  Handshake, KanbanSquare, MessageCircle, Plus, Users,
   UserRound, TrendingUp, Search, ClipboardCheck, UserPlus, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -292,7 +292,12 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
       <div className="flex snap-x gap-4 overflow-x-auto pb-4">
         {LEAD_STAGES.map(s=>{
           const grouped=filtered.filter(l=>l.stage===s.id);
-          return <section key={s.id} className="w-[282px] min-w-[282px] snap-start rounded-[22px] border bg-muted/50 p-3">
+          return <section key={s.id} className="w-[282px] min-w-[282px] snap-start rounded-[22px] border bg-muted/50 p-3"
+            onDragOver={e=>e.preventDefault()}
+            onDrop={e=>{e.preventDefault();const id=e.dataTransfer.getData("text/plain");
+              const current=leads.find(l=>l.id===id);
+              if(current&&current.stage!==s.id)void updateLead(id,{stage:s.id});
+            }}>
             <header className="mb-3 flex items-center justify-between px-2 py-2"><h4 className="text-sm font-bold">{s.name}</h4><span className="rounded-full bg-card px-2 py-0.5 text-xs">{grouped.length}</span></header>
             <div className="space-y-3">{grouped.map(l=>{
               const wa=crmPhone(l.phone);
