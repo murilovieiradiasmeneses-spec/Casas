@@ -35,3 +35,22 @@ Anúncios despublicados e operações de gravação devem ser restritos pelas po
 ## Próximas etapas
 
 Criar marcas e painéis isolados por imobiliária/construtora, membros por empresa, logotipos/domínios individuais e, se desejado, planos comerciais e cobrança. Essas funções **não** fazem parte do MVP de administrador único.
+
+
+## White-label / multi-empresa (fase inicial)
+
+Este repositório contém o início da arquitetura SaaS para comercialização de acessos:
+- Uma `agencies` por cliente, com logotipo, capa, cores, WhatsApp, Instagram e apresentação próprios.
+- Vitrine separada em `/v/<slug-do-cliente>`, com catálogo, mapa e página individual do imóvel.
+- Login em `/entrar`; o administrador geral administra empresas em `/admin/clientes`, e a marca em `/admin/marca`.
+- Usuários da empresa recebem vínculo em `agency_members`: **owner** pode editar a marca e imóveis; **editor** pode editar apenas imóveis.
+- Os imóveis são filtrados por `agency_id`; RLS no banco impede gravação e leitura de anúncios privados de outras empresas.
+- O repositório **não contém cobrança automática, domínio personalizado validado nem emissão automática de login por e-mail**.
+
+### Passo obrigatório para ativar
+
+Após a migração inicial, aplicar `drizzle/migrations/0001_whitelabel.sql` e `drizzle/migrations/0002_tenant_guards.sql` no banco associado ao CASAS (se ainda não foram aplicadas). A sincronização de código GitHub → Lovable **não comprova** que alterações SQL foram executadas no banco. Não conceda acessos de clientes antes de validar as políticas RLS. Consulte `docs/ADMIN.md`.
+
+### Domínios próprios
+
+O campo `custom_domain` é uma preparação; apontar DNS e exibir o site em domínio próprio requer confirmação de propriedade e roteamento seguro no hosting. Não aponte domínios para esta aplicação até a implementação de verificação.

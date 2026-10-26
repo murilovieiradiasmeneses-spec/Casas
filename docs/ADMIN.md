@@ -1,22 +1,43 @@
-# CASAS — Primeiro administrador
+# CASAS — Administração geral e acessos white-label
 
-Não existe cadastro público de administrador. O acesso ao `/admin` exige:
-1. Uma conta de email+senha no Lovable Cloud.
-2. Uma linha em `public.user_roles` com `role = 'admin'` para essa conta.
+## 1. Primeiro superadministrador
 
-Toda gravação (anúncios, fotos, agências) é bloqueada no banco por RLS para quem não tem esse papel.
+A conta master não fica no código. No provedor de autenticação do Lovable Cloud/Supabase, crie um usuário com email e senha forte. No SQL Editor do banco, vincule seu UUID à função global:
 
-## Passo a passo
-1. No Lovable, abra **Cloud → Users** e clique em **Add user** (email + senha forte, marcar como confirmado). Escolha você a senha; ela não fica no código.
-2. Em **Cloud → Database → SQL**, execute (troque o email):
-   ```sql
-   insert into public.user_roles (user_id, role)
-   select id, 'admin' from auth.users where email = 'seu-email@exemplo.com';
-   ```
-3. Acesse `/entrar`, faça login e use o painel em `/admin`.
+```sql
+insert into public.user_roles (user_id, role)
+select id, 'admin'::public.app_role from auth.users
+where email = 'SEU_EMAIL_AQUI'
+on conflict (user_id, role) do nothing;
+```
 
-Para revogar: `delete from public.user_roles where user_id = '<uuid>' and role = 'admin';`
+**Sem esse passo, você não terá acesso de superadministrador.** Ative MFA quando disponível.
 
-## Multi-empresa (futuro)
-Cada imóvel pertence a uma `agencies` (`agency_id`). Hoje há uma única agência `casas` e um admin global gerencia tudo.
-Para cadastrar o WhatsApp padrão: `update public.agencies set whatsapp = '+5511...' where slug = 'casas';`
+## 2. Banco de dados
+
+Aplique em ordem:
+1. `drizzle/migrations/0000_casas_schema.sql` (apenas se banco ainda não tiver a estrutura);
+2. `drizzle/migrations/0001_whitelabel.sql`;
+3. `drizzle/migrations/0002_tenant_guards.sql`.
+
+Confirme no banco que as tabelas `agencies`, `agency_members`, `properties` e as policies RLS existem. Confirme também buckets de imagens.
+
+O primeiro script não deve ser executado duas vezes em banco já provisionado. Não assuma que commits no GitHub executam migrations por conta própria.
+
+## 3. Cadastro e acesso vendido
+
+1. Entre em `/entrar` com o superadministrador.
+2. Abra `/admin/clientes` e cadastre a imobiliária/construtora com um identificador único.
+3. A vitrine será `/v/identificador` e poderá ter nome, cores, logo e imagem de capa próprios.
+4. Crie uma conta **individual para o cliente** em Auth → Users.
+5. Em `/admin/clientes`, selecione a empresa e vincule o email cadastrado como **owner** (marca + imóveis) ou **editor** (imóveis).
+6. O cliente entra pelo mesmo `/entrar` e só encontra suas empresas no seletor. Um superadmin pode abrir todos os clientes.
+7. Suspender uma empresa desativa a vitrine pública e seu acesso administrativo à empresa (sem excluir os dados).
+
+Para revogar uma conta, o superadmin pode excluir sua linha em `agency_members` via SQL Editor até criarmos gerenciamento de membros por tela.
+
+## 4. O que ainda falta para cobrar e lançar comercialmente
+
+Os recursos de cobrança, planos, assinatura, pagamentos, domínios próprios e convite automático por email não foram integrados nesta fase. Também é preciso validar a separação das empresas, permissões e publicação em ambiente de testes antes de usar com clientes pagantes.
+
+O site compartilhado `/` continua como catálogo central da plataforma; os sites white-label ficam em `/v/<slug>`. Os anúncios públicos do catálogo central são uma opção de marketplace — revisar essa regra de negócio antes do lançamento.

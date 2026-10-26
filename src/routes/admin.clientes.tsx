@@ -94,7 +94,7 @@ function Clients() {
               <div className="min-w-0 flex-1"><p className="font-semibold">{a.name}</p><p className="text-xs text-muted-foreground">/v/{a.slug}</p></div>
               <span className={"rounded-full px-3 py-1 text-xs " + (a.active ? "bg-green-100 text-green-900" : "bg-red-100 text-red-800")}>{a.active ? "Ativo" : "Suspenso"}</span>
               <a href={"/v/" + a.slug} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">Vitrine <ExternalLink className="h-3 w-3" /></a>
-              <Button size="sm" variant="outline" onClick={() => { setActiveAgencyId(a.id); }} asChild><Link to="/admin/marca" onClick={() => setActiveAgencyId(a.id)}>Personalizar</Link></Button>
+              <Button size="sm" variant="outline" asChild><Link to="/admin/marca" onClick={() => setActiveAgencyId(a.id)}>Personalizar</Link></Button>
               <Button size="sm" variant="outline" onClick={() => toggleActive.mutate({ id: a.id, active: !a.active })} disabled={toggleActive.isPending}>{a.active ? "Suspender" : "Ativar"}</Button>
             </div>
           ))}</div>}

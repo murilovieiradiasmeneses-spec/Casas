@@ -21,7 +21,7 @@ async function checkAccess() {
   if (mErr) throw mErr;
   if (!isAdmin && !membership?.length) return { state: "forbidden" as const, email: auth.user.email };
   let agenciesQuery = supabase.from("agencies").select("id,name,slug").order("name");
-  if (!isAdmin) agenciesQuery = agenciesQuery.in("id", (membership ?? []).map((m) => m.agency_id));
+  if (!isAdmin) agenciesQuery = agenciesQuery.in("id", (membership ?? []).map((m) => m.agency_id)).eq("active", true);
   const { data: agencies, error: agencyError } = await agenciesQuery;
   if (agencyError) throw agencyError;
   return {
