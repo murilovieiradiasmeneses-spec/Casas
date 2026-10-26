@@ -68,8 +68,21 @@ export async function signPaths(paths: (string | null | undefined)[]) {
   const unique = Array.from(new Set(paths.filter((p): p is string => !!p)));
   const map = new Map<string, string>();
   if (!unique.length) return map;
-  const { data } = await supabase.storage.from(BUCKET).createSignedUrls(unique, 60 * 60 * 6);
-  data?.forEach((d) => d.path && d.signedUrl && map.set(d.path, d.signedUrl));
+  // Agency staff can sign their own photos directly.
+  const { data: session } = await supabase.auth.getSession();
+  if (session.session) {
+    const { data } = await supabase.storage.from(BUCKET).createSignedUrls(unique, 60 * 60 * 6);
+    data?.forEach((d) => d.path && d.signedUrl && map.set(d.path, d.signedUrl));
+  }
+  // Published listing photos are signed on the server after a visibility check.
+  const missing = unique.filter((p) => !map.has(p));
+  if (missing.length) {
+    try {
+      const { signPublicPhotos } = await import("@/lib/photos.functions");
+      const res = await signPublicPhotos({ data: { paths: missing } });
+      res.forEach((r) => map.set(r.path, r.url));
+    } catch { /* leave unsigned */ }
+  }
   return map;
 }
 
