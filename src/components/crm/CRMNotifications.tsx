@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, ArrowUpRight, BellRing, Cake, CalendarClock, CalendarDays, CheckCircle2, Handshake, MessageCircle, X } from "lucide-react";
+import { AlertCircle, ArrowUpRight, BellRing, Cake, CalendarClock, CalendarDays, CheckCircle2, Handshake, MessageCircle, X, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { CRMAlert } from "@/lib/crm-notifications";
 import { crmPhone, type Lead } from "@/lib/crm";
@@ -11,8 +11,8 @@ type Props = {
   onOpen: (alert: CRMAlert) => void;
 };
 
-const icons = { birthday: Cake, followup: CalendarClock, negotiation: Handshake, visit: CalendarDays };
-const labels = { birthday: "Aniversário", followup: "Retorno de contato", negotiation: "Negociação", visit: "Visita" };
+const icons = { birthday: Cake, followup: CalendarClock, negotiation: Handshake, visit: CalendarDays, received: Inbox };
+const labels = { birthday: "Aniversário", followup: "Retorno de contato", negotiation: "Negociação", visit: "Visita", received: "Lead recebido" };
 const colors = {
   overdue: "bg-red-50 text-red-700 border-red-200",
   today: "bg-amber-50 text-amber-800 border-amber-200",
