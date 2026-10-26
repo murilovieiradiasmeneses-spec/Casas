@@ -46,7 +46,7 @@ const toValues = (p?: Property): Values => ({
 
 const sel = "h-9 w-full rounded-md border border-input bg-card px-3 text-sm";
 
-export function PropertyForm({ initial }: { initial?: Property }) {
+export function PropertyForm({ initial, manageBase = "/admin" }: { initial?: Property; manageBase?: "/admin" | "/cliente" }) {
   const navigate = useNavigate();
   const { activeAgencyId } = useAdminAgency();
   const qc = useQueryClient();
@@ -95,7 +95,8 @@ export function PropertyForm({ initial }: { initial?: Property }) {
         const { data, error } = await supabase.from("properties").insert({ ...parsed.data, agency_id: activeAgencyId }).select("id").single();
         if (error) throw error;
         toast.success("Imóvel criado. Agora envie as fotos.");
-        navigate({ to: "/admin/$id", params: { id: data.id } });
+        if (manageBase === "/cliente") navigate({ to: "/cliente/$id", params: { id: data.id } });
+        else navigate({ to: "/admin/$id", params: { id: data.id } });
       }
       qc.invalidateQueries({ queryKey: ["admin-properties", activeAgencyId] });
     } catch (err) {

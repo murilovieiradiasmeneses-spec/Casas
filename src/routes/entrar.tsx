@@ -39,7 +39,7 @@ function SignIn() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error("Email ou senha inválidos.");
-    navigate({ to: "/admin" });
+    navigate({ to: "/painel" });
   }
 
   return (

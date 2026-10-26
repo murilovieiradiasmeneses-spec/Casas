@@ -18,7 +18,7 @@ export function SiteHeader() {
           <Link to="/imoveis" className={link} activeProps={{ className: "text-foreground" }}>Explorar<span className="hidden sm:inline"> imóveis</span></Link>
           <Link to="/mapa" className={link} activeProps={{ className: "text-foreground" }}>Mapa</Link>
           {signedIn ? (
-            <Link to="/admin" className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-secondary">Painel</Link>
+            <Link to="/painel" className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-secondary">Painel</Link>
           ) : (
             <Link to="/entrar" className="rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-secondary">Entrar</Link>
           )}
