@@ -6,6 +6,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ClienteRouteImport } from './routes/cliente'
+import { Route as ConviteRouteImport } from './routes/convite'
 import { Route as CorretorRouteImport } from './routes/corretor'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as ImoveisRouteImport } from './routes/imoveis'
@@ -42,6 +43,11 @@ const AdminRoute = AdminRouteImport.update({
 const ClienteRoute = ClienteRouteImport.update({
   id: '/cliente',
   path: '/cliente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConviteRoute = ConviteRouteImport.update({
+  id: '/convite',
+  path: '/convite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CorretorRoute = CorretorRouteImport.update({
@@ -217,6 +223,9 @@ export interface FileRoutesByFullPath {
   '/cliente/crm': typeof ClienteCRMRoute
   '/cliente/marca': typeof ClienteMarcaRoute
   '/cliente/novo': typeof ClienteNovoRoute
+  '/convite': typeof ConviteRoute
+  '/convite': typeof ConviteRoute
+  '/convite': typeof ConviteRoute
   '/corretor': typeof CorretorRoute
   '/entrar': typeof EntrarRoute
   '/imoveis': typeof ImoveisRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/cliente/crm'
     | '/cliente/marca'
     | '/cliente/novo'
+    | '/convite'
     | '/corretor'
     | '/entrar'
     | '/imoveis'
@@ -323,6 +333,7 @@ export interface FileRouteTypes {
     | '/cliente/crm'
     | '/cliente/marca'
     | '/cliente/novo'
+    | '/convite'
     | '/corretor'
     | '/entrar'
     | '/imoveis'
@@ -349,6 +360,7 @@ export interface FileRouteTypes {
     | '/cliente/crm'
     | '/cliente/marca'
     | '/cliente/novo'
+    | '/convite'
     | '/corretor'
     | '/entrar'
     | '/imoveis'
@@ -469,6 +481,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClienteNovoRouteImport
       parentRoute: typeof ClienteRoute
     }
+    '/convite': {
+      id: '/convite'
+      path: '/convite'
+      fullPath: '/convite'
+      preLoaderRoute: typeof ConviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/corretor': {
       id: '/corretor'
       path: '/corretor'
@@ -546,6 +565,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   ClienteRoute: typeof ClienteRouteWithChildren
+  ConviteRoute: typeof ConviteRoute
   CorretorRoute: typeof CorretorRoute
   EntrarRoute: typeof EntrarRoute
   ImoveisRoute: typeof ImoveisRoute
@@ -559,6 +579,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ClienteRoute: ClienteRouteWithChildren,
+  ConviteRoute: ConviteRoute,
   CorretorRoute: CorretorRoute,
   EntrarRoute: EntrarRoute,
   ImoveisRoute: ImoveisRoute,
