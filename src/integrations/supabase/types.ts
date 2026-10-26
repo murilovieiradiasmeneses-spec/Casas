@@ -21,6 +21,7 @@ export type Database = {
           property_id: string | null
           assigned_agent_id: string | null
           consent_at: string | null
+          birth_date: string | null
           name: string
           phone: string
           email: string | null
@@ -38,6 +39,7 @@ export type Database = {
           property_id?: string | null
           assigned_agent_id?: string | null
           consent_at?: string | null
+          birth_date?: string | null
           name: string
           phone?: string
           email?: string | null
@@ -55,6 +57,7 @@ export type Database = {
           property_id?: string | null
           assigned_agent_id?: string | null
           consent_at?: string | null
+          birth_date?: string | null
           name?: string
           phone?: string
           email?: string | null
