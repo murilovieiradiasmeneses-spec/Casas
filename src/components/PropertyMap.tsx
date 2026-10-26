@@ -117,6 +117,12 @@ export function PinPicker({
       map.current = L.map(el.current).setView(start, lat != null ? 15 : 4);
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "&copy; OpenStreetMap" }).addTo(map.current);
       map.current.on("click", (e) => cb.current(+e.latlng.lat.toFixed(6), +e.latlng.lng.toFixed(6)));
+      // Render the pre-existing pin as soon as Leaflet loads. The coordinates
+      // effect may already have fired while this async import was pending.
+      if (lat != null && lng != null) {
+        const icon = L.divIcon({ className: "", html: '<span class="casas-pin active">Aqui</span>', iconSize: [0, 0] });
+        marker.current = L.marker([lat, lng], { icon }).addTo(map.current);
+      }
       setTimeout(() => map.current?.invalidateSize(), 50);
     });
     return () => {
