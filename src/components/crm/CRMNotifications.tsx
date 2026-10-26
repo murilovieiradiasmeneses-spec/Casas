@@ -96,7 +96,7 @@ export function CRMNotifications({ agencyName, alerts, leads, onOpen }: Props) {
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Button size="sm" variant="outline" onClick={()=>openRecord(item)} className="gap-1.5">
-                      Abrir {item.kind==="birthday"||item.kind==="followup"?"cliente":item.kind==="negotiation"?"negociações":"visitas"}
+                      Abrir {item.kind==="birthday"||item.kind==="followup"||item.kind==="received"?"cliente":item.kind==="negotiation"?"negociações":"visitas"}
                       <ArrowUpRight className="h-3.5 w-3.5"/>
                     </Button>
                     {phone&&<Button size="sm" variant="outline" asChild>

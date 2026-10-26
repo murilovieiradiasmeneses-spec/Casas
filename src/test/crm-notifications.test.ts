@@ -19,6 +19,17 @@ const get = (leads: Lead[] = [], deals: Deal[] = [], visits: Visit[] = [], date 
   getCRMAlerts({ leads, visits, deals }, date);
 
 describe("CRM notifications", () => {
+  it("informa novos leads recebidos somente ao corretor responsável", () => {
+    const assigned=lead({assigned_agent_id:"agent-1"});
+    const dataset={leads:[assigned],visits:[],deals:[]};
+    expect(getCRMAlerts(dataset,today,7,false)).toHaveLength(0);
+    const alerts=getCRMAlerts(dataset,today,7,true);
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0].kind).toBe("received");
+    expect(getCRMAlerts({leads:[lead({assigned_agent_id:null})],visits:[],deals:[]},today,7,true)).toHaveLength(0);
+    expect(getCRMAlerts({leads:[lead({stage:"contato",assigned_agent_id:"agent-1"})],visits:[],deals:[]},today,7,true)).toHaveLength(0);
+  });
+
   it("avisa do aniversário de hoje sem depender do ano do nascimento", () => {
     const notifications = get([lead({ birth_date: "1993-10-26" })]);
     expect(notifications).toHaveLength(1);
