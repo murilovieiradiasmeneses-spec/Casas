@@ -122,6 +122,13 @@ export type Database = {
             referencedRelation: "agencies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "agency_billing_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: true
+            referencedRelation: "public_agency_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       agency_members: {
@@ -149,6 +156,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_members_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agency_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -196,6 +210,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_broker_invitations_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agency_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -252,6 +273,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "crm_deals_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agency_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "crm_deals_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
@@ -263,6 +291,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_listings"
             referencedColumns: ["id"]
           },
         ]
@@ -331,6 +366,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "crm_leads_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agency_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "crm_leads_assigned_agent_id_fkey"
             columns: ["assigned_agent_id"]
             isOneToOne: false
@@ -342,6 +384,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_listings"
             referencedColumns: ["id"]
           },
         ]
@@ -382,6 +431,13 @@ export type Database = {
             referencedRelation: "agencies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "crm_salespeople_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agency_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       crm_settings: {
@@ -406,6 +462,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: true
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_settings_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: true
+            referencedRelation: "public_agency_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -453,6 +516,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "crm_visits_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agency_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "crm_visits_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
@@ -464,6 +534,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_visits_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_listings"
             referencedColumns: ["id"]
           },
         ]
@@ -585,6 +662,13 @@ export type Database = {
             referencedRelation: "agencies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "properties_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agency_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       property_images: {
@@ -620,6 +704,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "property_images_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_property_listings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -643,14 +734,119 @@ export type Database = {
     }
     Views: {
       public_agency_profiles: {
-        Row: Omit<Database["public"]["Tables"]["agencies"]["Row"], "created_at" | "custom_domain">
+        Row: {
+          about: string | null
+          active: boolean | null
+          address: string | null
+          background_color: string | null
+          email: string | null
+          hero_text_color: string | null
+          hero_url: string | null
+          id: string | null
+          instagram: string | null
+          logo_url: string | null
+          name: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          slug: string | null
+          tagline: string | null
+          text_color: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          about?: string | null
+          active?: boolean | null
+          address?: string | null
+          background_color?: string | null
+          email?: string | null
+          hero_text_color?: string | null
+          hero_url?: string | null
+          id?: string | null
+          instagram?: string | null
+          logo_url?: string | null
+          name?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug?: string | null
+          tagline?: string | null
+          text_color?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          about?: string | null
+          active?: boolean | null
+          address?: string | null
+          background_color?: string | null
+          email?: string | null
+          hero_text_color?: string | null
+          hero_url?: string | null
+          id?: string | null
+          instagram?: string | null
+          logo_url?: string | null
+          name?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          slug?: string | null
+          tagline?: string | null
+          text_color?: string | null
+          whatsapp?: string | null
+        }
         Relationships: []
       }
       public_property_listings: {
-        Row: Database["public"]["Tables"]["properties"]["Row"]
-        Relationships: []
+        Row: {
+          address: string | null
+          agency_id: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          built_area: number | null
+          cep: string | null
+          city: string | null
+          cover_image_url: string | null
+          created_at: string | null
+          description: string | null
+          featured: boolean | null
+          features: string[] | null
+          id: string | null
+          income_max: number | null
+          income_min: number | null
+          is_off_plan: boolean | null
+          land_area: number | null
+          latitude: number | null
+          longitude: number | null
+          neighborhood: string | null
+          parking: number | null
+          price: number | null
+          price_display_type: string | null
+          property_type: string | null
+          published: boolean | null
+          purpose: string | null
+          show_address: boolean | null
+          slug: string | null
+          state: string | null
+          status: string | null
+          suites: number | null
+          title: string | null
+          updated_at: string | null
+          whatsapp: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agency_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      [_ in never]: never
     }
     Functions: {
       assign_agency_member: {
@@ -660,6 +856,10 @@ export type Database = {
       can_edit_brand: { Args: { _agency_id: string }; Returns: boolean }
       can_manage_agency: { Args: { _agency_id: string }; Returns: boolean }
       can_manage_property_image_path: {
+        Args: { _path: string }
+        Returns: boolean
+      }
+      can_read_public_property_photo: {
         Args: { _path: string }
         Returns: boolean
       }
@@ -705,6 +905,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_published_active_property: {
+        Args: { _property_id: string }
         Returns: boolean
       }
       list_agency_users_admin: {
