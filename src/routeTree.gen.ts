@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ClienteRouteImport } from './routes/cliente'
+import { Route as AcessoClienteRouteImport } from './routes/acesso-cliente'
 import { Route as AcessoCorretorRouteImport } from './routes/acesso-corretor'
 import { Route as ConviteRouteImport } from './routes/convite'
 import { Route as CorretorRouteImport } from './routes/corretor'
@@ -52,6 +53,11 @@ const AdminRoute = AdminRouteImport.update({
 const ClienteRoute = ClienteRouteImport.update({
   id: '/cliente',
   path: '/cliente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcessoClienteRoute = AcessoClienteRouteImport.update({
+  id: '/acesso-cliente',
+  path: '/acesso-cliente',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AcessoCorretorRoute = AcessoCorretorRouteImport.update({
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/cliente': typeof ClienteRouteWithChildren
+  '/acesso-cliente': typeof AcessoClienteRoute
   '/acesso-corretor': typeof AcessoCorretorRoute
   '/convite': typeof ConviteRoute
   '/corretor': typeof CorretorRoute
@@ -218,6 +225,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/acesso-cliente': typeof AcessoClienteRoute
   '/acesso-corretor': typeof AcessoCorretorRoute
   '/convite': typeof ConviteRoute
   '/corretor': typeof CorretorRoute
@@ -249,6 +257,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/cliente': typeof ClienteRouteWithChildren
+  '/acesso-cliente': typeof AcessoClienteRoute
   '/acesso-corretor': typeof AcessoCorretorRoute
   '/convite': typeof ConviteRoute
   '/corretor': typeof CorretorRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/cliente'
+    | '/acesso-cliente'
     | '/acesso-corretor'
     | '/convite'
     | '/corretor'
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/acesso-cliente'
     | '/acesso-corretor'
     | '/convite'
     | '/corretor'
@@ -341,6 +352,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/cliente'
+    | '/acesso-cliente'
     | '/acesso-corretor'
     | '/convite'
     | '/corretor'
@@ -373,6 +385,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   ClienteRoute: typeof ClienteRouteWithChildren
+  AcessoClienteRoute: typeof AcessoClienteRoute
   AcessoCorretorRoute: typeof AcessoCorretorRoute
   ConviteRoute: typeof ConviteRoute
   CorretorRoute: typeof CorretorRoute
@@ -406,6 +419,13 @@ declare module '@tanstack/react-router' {
       path: '/cliente'
       fullPath: '/cliente'
       preLoaderRoute: typeof ClienteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/acesso-cliente': {
+      id: '/acesso-cliente'
+      path: '/acesso-cliente'
+      fullPath: '/acesso-cliente'
+      preLoaderRoute: typeof AcessoClienteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/acesso-corretor': {
@@ -656,6 +676,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ClienteRoute: ClienteRouteWithChildren,
+  AcessoClienteRoute: AcessoClienteRoute,
   AcessoCorretorRoute: AcessoCorretorRoute,
   ConviteRoute: ConviteRoute,
   CorretorRoute: CorretorRoute,
