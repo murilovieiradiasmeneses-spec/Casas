@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS public.crm_salespeople (
 ALTER TABLE public.crm_salespeople ENABLE ROW LEVEL SECURITY;
 GRANT SELECT ON public.crm_salespeople TO authenticated;
 REVOKE INSERT,UPDATE,DELETE ON public.crm_salespeople FROM authenticated;
+
 ALTER TABLE public.crm_leads ADD COLUMN IF NOT EXISTS assigned_agent_id uuid REFERENCES public.crm_salespeople(id) ON DELETE SET NULL;
 CREATE INDEX IF NOT EXISTS crm_leads_assignee_idx ON public.crm_leads(assigned_agent_id);
 
