@@ -7,7 +7,7 @@ import { BedDouble, Bath, Car, Maximize, Trees, Sparkles, MapPin, MessageCircle,
 import { PropertyMap } from "@/components/PropertyMap";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/PropertyCard";
-import { fetchBySlug, formatPrice, PURPOSE_LABEL, STATUS_LABEL, TYPE_LABEL, whatsappLink } from "@/lib/properties";
+import { fetchBySlug, formatListingPrice, PURPOSE_LABEL, STATUS_LABEL, TYPE_LABEL, whatsappLink } from "@/lib/properties";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/imovel/$slug")({
@@ -61,7 +61,7 @@ function PropertyPage() {
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_360px]">
         <div>
-          <p className="eyebrow text-primary">{TYPE_LABEL[p.property_type]} · {PURPOSE_LABEL[p.purpose]} · {STATUS_LABEL[p.status]}</p>
+          <p className="eyebrow text-primary">{TYPE_LABEL[p.property_type]} · {PURPOSE_LABEL[p.purpose]} · {STATUS_LABEL[p.status]}{p.is_off_plan?' · Na planta':''}</p>
           <h1 className="mt-2 text-4xl md:text-5xl">{p.title}</h1>
           <p className="mt-2 flex items-center gap-1.5 text-muted-foreground"><MapPin className="h-4 w-4" />{p.show_address && p.address ? `${p.address} · ` : ""}{p.neighborhood}, {p.city} – {p.state}</p>
 
@@ -98,7 +98,7 @@ function PropertyPage() {
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-xl border bg-card p-6 shadow-soft">
             <p className="text-sm text-muted-foreground">{PURPOSE_LABEL[p.purpose]}</p>
-            <p className="mt-1 font-display text-4xl font-semibold">{formatPrice(p.price, p.purpose)}</p>
+            <p className="mt-1 font-display text-4xl font-semibold">{formatListingPrice(p)}</p>
             {phone ? (
               <Button asChild size="lg" className="mt-6 w-full">
                 <a href={whatsappLink(phone, p, origin)} target="_blank" rel="noopener noreferrer"><MessageCircle /> Falar no WhatsApp</a>

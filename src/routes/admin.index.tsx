@@ -10,7 +10,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { BUCKET, formatPrice, STATUS_LABEL, TYPE_LABEL, type Property } from "@/lib/properties";
+import { BUCKET, formatListingPrice, STATUS_LABEL, TYPE_LABEL, type Property } from "@/lib/properties";
 
 export const Route = createFileRoute("/admin/")({ component: Dashboard });
 
@@ -82,7 +82,7 @@ function Dashboard() {
               <div key={p.id} className="flex flex-col gap-3 p-4 md:flex-row md:items-center">
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{p.title}</p>
-                  <p className="text-xs text-muted-foreground">{TYPE_LABEL[p.property_type]} · {p.neighborhood}, {p.city} · {formatPrice(p.price, p.purpose)}</p>
+                  <p className="text-xs text-muted-foreground">{TYPE_LABEL[p.property_type]} · {p.neighborhood}, {p.city} · {formatListingPrice(p)}</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <select aria-label="Status" className="h-8 rounded-md border bg-card px-2 text-xs" value={p.status} onChange={(e) => update.mutate({ id: p.id, patch: { status: e.target.value } })}>

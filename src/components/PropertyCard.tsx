@@ -1,5 +1,5 @@
 import { BedDouble, Bath, Car, Maximize, ImageOff, ArrowUpRight, MapPin } from "lucide-react";
-import { formatPrice, PURPOSE_LABEL, STATUS_LABEL, type PropertyWithCover } from "@/lib/properties";
+import { formatListingPrice, PURPOSE_LABEL, STATUS_LABEL, type PropertyWithCover } from "@/lib/properties";
 import { cn } from "@/lib/utils";
 
 export function PropertyCard({
@@ -32,6 +32,7 @@ export function PropertyCard({
         )}
         <div className="absolute left-4 top-4 flex flex-wrap gap-2">
           <span className="rounded-full bg-card/95 px-3 py-1.5 text-[11px] font-bold shadow-sm backdrop-blur">{PURPOSE_LABEL[p.purpose]}</span>
+          {p.is_off_plan&&<span className="rounded-full bg-violet-100 px-3 py-1.5 text-[11px] font-bold text-violet-900 shadow-sm">Na planta</span>}
           {p.featured && <span className="rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground shadow-sm">Destaque</span>}
           {p.status !== "disponivel" && <span className="rounded-full bg-charcoal px-2.5 py-1 text-[11px] font-semibold text-charcoal-foreground">{STATUS_LABEL[p.status]}</span>}
         </div>
@@ -42,7 +43,7 @@ export function PropertyCard({
           <h3 className="line-clamp-2 text-[21px] leading-snug">{p.title}</h3>
           <span className="shrink-0 rounded-full bg-secondary p-2 text-foreground transition-all group-hover:bg-primary group-hover:text-primary-foreground"><ArrowUpRight className="h-4 w-4" /></span>
         </div>
-        <p className="mt-3 font-display text-2xl font-bold tracking-[-0.045em]">{formatPrice(p.price, p.purpose)}</p>
+        <p className="mt-3 font-display text-2xl font-bold tracking-[-0.045em]">{formatListingPrice(p)}</p>
         <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border/70 pt-4 text-xs font-medium text-muted-foreground">
           {p.property_type !== "terreno" && <span className="flex items-center gap-1"><BedDouble className="h-3.5 w-3.5" />{p.bedrooms}</span>}
           {p.property_type !== "terreno" && <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5" />{p.bathrooms}</span>}
