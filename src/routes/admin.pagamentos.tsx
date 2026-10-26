@@ -28,7 +28,7 @@ function ManualBillingPage() {
     enabled: isPlatformAdmin,
     queryFn: async () => {
       const [agencies, billing] = await Promise.all([
-        supabase.from("agencies").select("id,name,slug,active").order("name"),
+        supabase.from("agencies").select("id,name,slug,active").neq("slug","casas").order("name"),
         supabase.from("agency_billing").select("*"),
       ]);
       if (agencies.error) throw agencies.error;

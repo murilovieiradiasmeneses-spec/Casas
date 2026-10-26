@@ -21,6 +21,7 @@ async function checkAccess() {
   if (mErr) throw mErr;
   if (!isAdmin && !membership?.length) return { state: "forbidden" as const, email: auth.user.email };
   let agenciesQuery = supabase.from("agencies").select("id,name,slug").order("name");
+  if (isAdmin) agenciesQuery = agenciesQuery.neq("slug", "casas"); // Ignore a empresa técnica inicial.
   if (!isAdmin) agenciesQuery = agenciesQuery.in("id", (membership ?? []).map((m) => m.agency_id)).eq("active", true);
   const { data: agencies, error: agencyError } = await agenciesQuery;
   if (agencyError) throw agencyError;
@@ -53,8 +54,8 @@ function AdminLayout() {
       <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b pb-5">
           <div className="flex flex-wrap items-center gap-4">
-            <Link to="/admin" className="font-display text-2xl">CASAS · Painel Master</Link>
-            <Link to="/admin/novo" className="text-sm hover:underline">Novo imóvel</Link>
+            <Link to="/admin/clientes" className="font-display text-2xl">CASAS · Painel Master</Link>
+            <Link to="/admin/novo" className="text-sm hover:underline">Cadastrar imóvel</Link>
             <Link to="/admin/marca" className="text-sm hover:underline">Identidade visual</Link>
             {q.data.isPlatformAdmin && <Link to="/admin/clientes" className="text-sm hover:underline">Meus clientes</Link>}
             {q.data.isPlatformAdmin && <Link to="/admin/pagamentos" className="text-sm hover:underline">Pagamentos</Link>}
@@ -65,7 +66,7 @@ function AdminLayout() {
           </div>
         </div>
         <div className="mb-7 flex flex-wrap items-center gap-3 rounded-xl border bg-card p-4">
-          <label htmlFor="agency-active" className="text-sm font-medium">Você está gerenciando:</label>
+          <label htmlFor="agency-active" className="text-sm font-medium">Imobiliária em gestão:</label>
           <select id="agency-active" className="min-w-52 rounded-md border bg-background px-3 py-2 text-sm" value={activeAgencyId} onChange={(e) => { setSelected(e.target.value); navigate({ to: "/admin" }); }}>
             {agencies.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>

@@ -293,6 +293,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      list_agency_users_admin: { Args: Record<string, never>; Returns: { agency_id: string; user_id: string; email: string; role: string }[] }
       can_manage_agency: { Args: { _agency_id: string }; Returns: boolean }
       can_edit_brand: { Args: { _agency_id: string }; Returns: boolean }
       assign_agency_member: { Args: { _agency_id: string; _email: string; _role: string }; Returns: string }

@@ -11,7 +11,8 @@ export const Route = createFileRoute("/admin/$id")({ component: EditProperty });
 
 function EditProperty() {
   const { id } = Route.useParams();
-  const { activeAgencyId } = useAdminAgency();
+  const { activeAgencyId, agencies } = useAdminAgency();
+  const agencySlug = agencies.find((a) => a.id === activeAgencyId)?.slug;
   const q = useQuery({
     queryKey: ["admin-property", activeAgencyId, id],
     queryFn: async () => {
@@ -27,7 +28,7 @@ function EditProperty() {
     <div className="space-y-10">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="text-4xl">Editar imóvel</h1>
-        {p.published && <Link to="/imovel/$slug" params={{ slug: p.slug }} className="text-sm underline-offset-4 hover:underline">Ver página pública</Link>}
+        {p.published && agencySlug && <a href={`/v/${agencySlug}/imovel/${p.slug}`} target="_blank" rel="noopener noreferrer" className="text-sm underline-offset-4 hover:underline">Ver página pública ↗</a>}
       </div>
       <ImageManager property={p} onChange={() => q.refetch()} />
       <PropertyForm key={p.updated_at} initial={p} />

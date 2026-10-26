@@ -54,3 +54,14 @@ Os clientes pagam diretamente ao responsável pela plataforma, em negociação c
 Não serão integrados gateways de pagamento nesta fase, pois a negociação e o recebimento serão realizados por WhatsApp. Domínios próprios e convite automático por email também não foram integrados. Também é preciso validar a separação das empresas, permissões e publicação em ambiente de testes antes de usar com clientes pagantes.
 
 O site compartilhado `/` continua como catálogo central da plataforma; os sites white-label ficam em `/v/<slug>`. Os anúncios públicos do catálogo central são uma opção de marketplace — revisar essa regra de negócio antes do lançamento.
+
+
+## 6. Distinção entre painel master e acesso do cliente
+
+- Depois do login em `/entrar`, a rota `/painel` identifica o papel do usuário.
+- Superadministradores são encaminhados a `/admin/clientes` (gestão geral) e podem trocar a empresa no seletor do painel.
+- Usuários vinculados a uma empresa, sem papel global, entram em `/cliente`, com abas **Meus imóveis**, **Cadastrar imóvel** e **Identidade visual**.
+- O painel master mostra **nome, código, usuários vinculados e ações de cada empresa**. O endereço público é `/v/<slug-da-empresa>`.
+- `/admin` não concede permissões globais às contas dos clientes; elas são encaminhadas a `/cliente`.
+- Políticas RLS do Supabase impõem separação por `agency_id`. Para liberar comercialmente, testar todas as ações com duas contas diferentes (A e B).
+- A migração `drizzle/migrations/0005_admin_user_directory.sql` habilita a lista segura de usuários vinculados no painel master.
