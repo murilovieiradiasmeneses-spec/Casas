@@ -1,12 +1,12 @@
 /* eslint-disable */
 // @ts-nocheck
-// This file is generated for CASAS from the file-route manifest.
-// Vite/TanStack Router may regenerate it automatically on the next build.
+// Generated CASAS TanStack Router route manifest; router plugin may regenerate.
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as ClienteRouteImport } from './routes/cliente'
+import { Route as CorretorRouteImport } from './routes/corretor'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as ImoveisRouteImport } from './routes/imoveis'
 import { Route as ImovelSlugRouteImport } from './routes/imovel.$slug'
@@ -17,11 +17,13 @@ import { Route as VAgencySlugRouteImport } from './routes/v.$agencySlug'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminIdRouteImport } from './routes/admin.$id'
 import { Route as AdminClientesRouteImport } from './routes/admin.clientes'
+import { Route as AdminCRMRouteImport } from './routes/admin.crm'
 import { Route as AdminMarcaRouteImport } from './routes/admin.marca'
 import { Route as AdminNovoRouteImport } from './routes/admin.novo'
 import { Route as AdminPagamentosRouteImport } from './routes/admin.pagamentos'
 import { Route as ClienteIndexRouteImport } from './routes/cliente.index'
 import { Route as ClienteIdRouteImport } from './routes/cliente.$id'
+import { Route as ClienteCRMRouteImport } from './routes/cliente.crm'
 import { Route as ClienteMarcaRouteImport } from './routes/cliente.marca'
 import { Route as ClienteNovoRouteImport } from './routes/cliente.novo'
 import { Route as VAgencySlugIndexRouteImport } from './routes/v.$agencySlug.index'
@@ -40,6 +42,11 @@ const AdminRoute = AdminRouteImport.update({
 const ClienteRoute = ClienteRouteImport.update({
   id: '/cliente',
   path: '/cliente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorretorRoute = CorretorRouteImport.update({
+  id: '/corretor',
+  path: '/corretor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EntrarRoute = EntrarRouteImport.update({
@@ -78,65 +85,121 @@ const VAgencySlugRoute = VAgencySlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/',
+  id: '/admin/',
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminIdRoute = AdminIdRouteImport.update({
-  id: '/$id',
+  id: '/admin/$id',
   path: '/$id',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminClientesRoute = AdminClientesRouteImport.update({
-  id: '/clientes',
+  id: '/admin/clientes',
   path: '/clientes',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCRMRoute = AdminCRMRouteImport.update({
+  id: '/admin/crm',
+  path: '/crm',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMarcaRoute = AdminMarcaRouteImport.update({
-  id: '/marca',
+  id: '/admin/marca',
   path: '/marca',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminNovoRoute = AdminNovoRouteImport.update({
-  id: '/novo',
+  id: '/admin/novo',
   path: '/novo',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPagamentosRoute = AdminPagamentosRouteImport.update({
-  id: '/pagamentos',
+  id: '/admin/pagamentos',
   path: '/pagamentos',
   getParentRoute: () => AdminRoute,
 } as any)
 const ClienteIndexRoute = ClienteIndexRouteImport.update({
-  id: '/',
+  id: '/cliente/',
   path: '/',
   getParentRoute: () => ClienteRoute,
 } as any)
 const ClienteIdRoute = ClienteIdRouteImport.update({
-  id: '/$id',
+  id: '/cliente/$id',
   path: '/$id',
   getParentRoute: () => ClienteRoute,
 } as any)
+const ClienteCRMRoute = ClienteCRMRouteImport.update({
+  id: '/cliente/crm',
+  path: '/crm',
+  getParentRoute: () => ClienteRoute,
+} as any)
 const ClienteMarcaRoute = ClienteMarcaRouteImport.update({
-  id: '/marca',
+  id: '/cliente/marca',
   path: '/marca',
   getParentRoute: () => ClienteRoute,
 } as any)
 const ClienteNovoRoute = ClienteNovoRouteImport.update({
-  id: '/novo',
+  id: '/cliente/novo',
   path: '/novo',
   getParentRoute: () => ClienteRoute,
 } as any)
 const VAgencySlugIndexRoute = VAgencySlugIndexRouteImport.update({
-  id: '/',
+  id: '/v/$agencySlug/',
   path: '/',
   getParentRoute: () => VAgencySlugRoute,
 } as any)
 const VAgencySlugImovelSlugRoute = VAgencySlugImovelSlugRouteImport.update({
-  id: '/imovel/$slug',
+  id: '/v/$agencySlug/imovel/$slug',
   path: '/imovel/$slug',
   getParentRoute: () => VAgencySlugRoute,
 } as any)
+
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminIdRoute: typeof AdminIdRoute
+  AdminClientesRoute: typeof AdminClientesRoute
+  AdminCRMRoute: typeof AdminCRMRoute
+  AdminMarcaRoute: typeof AdminMarcaRoute
+  AdminNovoRoute: typeof AdminNovoRoute
+  AdminPagamentosRoute: typeof AdminPagamentosRoute
+}
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+  AdminIdRoute: AdminIdRoute,
+  AdminClientesRoute: AdminClientesRoute,
+  AdminCRMRoute: AdminCRMRoute,
+  AdminMarcaRoute: AdminMarcaRoute,
+  AdminNovoRoute: AdminNovoRoute,
+  AdminPagamentosRoute: AdminPagamentosRoute,
+}
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface ClienteRouteChildren {
+  ClienteIndexRoute: typeof ClienteIndexRoute
+  ClienteIdRoute: typeof ClienteIdRoute
+  ClienteCRMRoute: typeof ClienteCRMRoute
+  ClienteMarcaRoute: typeof ClienteMarcaRoute
+  ClienteNovoRoute: typeof ClienteNovoRoute
+}
+const ClienteRouteChildren: ClienteRouteChildren = {
+  ClienteIndexRoute: ClienteIndexRoute,
+  ClienteIdRoute: ClienteIdRoute,
+  ClienteCRMRoute: ClienteCRMRoute,
+  ClienteMarcaRoute: ClienteMarcaRoute,
+  ClienteNovoRoute: ClienteNovoRoute,
+}
+const ClienteRouteWithChildren = ClienteRoute._addFileChildren(ClienteRouteChildren)
+
+interface VAgencySlugRouteChildren {
+  VAgencySlugIndexRoute: typeof VAgencySlugIndexRoute
+  VAgencySlugImovelSlugRoute: typeof VAgencySlugImovelSlugRoute
+}
+const VAgencySlugRouteChildren: VAgencySlugRouteChildren = {
+  VAgencySlugIndexRoute: VAgencySlugIndexRoute,
+  VAgencySlugImovelSlugRoute: VAgencySlugImovelSlugRoute,
+}
+const VAgencySlugRouteWithChildren = VAgencySlugRoute._addFileChildren(VAgencySlugRouteChildren)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -144,14 +207,17 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/$id': typeof AdminIdRoute
   '/admin/clientes': typeof AdminClientesRoute
+  '/admin/crm': typeof AdminCRMRoute
   '/admin/marca': typeof AdminMarcaRoute
   '/admin/novo': typeof AdminNovoRoute
   '/admin/pagamentos': typeof AdminPagamentosRoute
   '/cliente': typeof ClienteRouteWithChildren
   '/cliente/': typeof ClienteIndexRoute
   '/cliente/$id': typeof ClienteIdRoute
+  '/cliente/crm': typeof ClienteCRMRoute
   '/cliente/marca': typeof ClienteMarcaRoute
   '/cliente/novo': typeof ClienteNovoRoute
+  '/corretor': typeof CorretorRoute
   '/entrar': typeof EntrarRoute
   '/imoveis': typeof ImoveisRoute
   '/imovel/$slug': typeof ImovelSlugRoute
@@ -167,13 +233,16 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/$id': typeof AdminIdRoute
   '/admin/clientes': typeof AdminClientesRoute
+  '/admin/crm': typeof AdminCRMRoute
   '/admin/marca': typeof AdminMarcaRoute
   '/admin/novo': typeof AdminNovoRoute
   '/admin/pagamentos': typeof AdminPagamentosRoute
   '/cliente': typeof ClienteIndexRoute
   '/cliente/$id': typeof ClienteIdRoute
+  '/cliente/crm': typeof ClienteCRMRoute
   '/cliente/marca': typeof ClienteMarcaRoute
   '/cliente/novo': typeof ClienteNovoRoute
+  '/corretor': typeof CorretorRoute
   '/entrar': typeof EntrarRoute
   '/imoveis': typeof ImoveisRoute
   '/imovel/$slug': typeof ImovelSlugRoute
@@ -190,14 +259,17 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/$id': typeof AdminIdRoute
   '/admin/clientes': typeof AdminClientesRoute
+  '/admin/crm': typeof AdminCRMRoute
   '/admin/marca': typeof AdminMarcaRoute
   '/admin/novo': typeof AdminNovoRoute
   '/admin/pagamentos': typeof AdminPagamentosRoute
   '/cliente': typeof ClienteRouteWithChildren
   '/cliente/': typeof ClienteIndexRoute
   '/cliente/$id': typeof ClienteIdRoute
+  '/cliente/crm': typeof ClienteCRMRoute
   '/cliente/marca': typeof ClienteMarcaRoute
   '/cliente/novo': typeof ClienteNovoRoute
+  '/corretor': typeof CorretorRoute
   '/entrar': typeof EntrarRoute
   '/imoveis': typeof ImoveisRoute
   '/imovel/$slug': typeof ImovelSlugRoute
@@ -216,14 +288,17 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/$id'
     | '/admin/clientes'
+    | '/admin/crm'
     | '/admin/marca'
     | '/admin/novo'
     | '/admin/pagamentos'
     | '/cliente'
     | '/cliente/'
     | '/cliente/$id'
+    | '/cliente/crm'
     | '/cliente/marca'
     | '/cliente/novo'
+    | '/corretor'
     | '/entrar'
     | '/imoveis'
     | '/imovel/$slug'
@@ -239,13 +314,16 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/$id'
     | '/admin/clientes'
+    | '/admin/crm'
     | '/admin/marca'
     | '/admin/novo'
     | '/admin/pagamentos'
     | '/cliente'
     | '/cliente/$id'
+    | '/cliente/crm'
     | '/cliente/marca'
     | '/cliente/novo'
+    | '/corretor'
     | '/entrar'
     | '/imoveis'
     | '/imovel/$slug'
@@ -261,14 +339,17 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/$id'
     | '/admin/clientes'
+    | '/admin/crm'
     | '/admin/marca'
     | '/admin/novo'
     | '/admin/pagamentos'
     | '/cliente'
     | '/cliente/'
     | '/cliente/$id'
+    | '/cliente/crm'
     | '/cliente/marca'
     | '/cliente/novo'
+    | '/corretor'
     | '/entrar'
     | '/imoveis'
     | '/imovel/$slug'
@@ -318,6 +399,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClientesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/crm': {
+      id: '/admin/crm'
+      path: '/crm'
+      fullPath: '/admin/crm'
+      preLoaderRoute: typeof AdminCRMRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/marca': {
       id: '/admin/marca'
       path: '/marca'
@@ -360,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClienteIdRouteImport
       parentRoute: typeof ClienteRoute
     }
+    '/cliente/crm': {
+      id: '/cliente/crm'
+      path: '/crm'
+      fullPath: '/cliente/crm'
+      preLoaderRoute: typeof ClienteCRMRouteImport
+      parentRoute: typeof ClienteRoute
+    }
     '/cliente/marca': {
       id: '/cliente/marca'
       path: '/marca'
@@ -373,6 +468,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/cliente/novo'
       preLoaderRoute: typeof ClienteNovoRouteImport
       parentRoute: typeof ClienteRoute
+    }
+    '/corretor': {
+      id: '/corretor'
+      path: '/corretor'
+      fullPath: '/corretor'
+      preLoaderRoute: typeof CorretorRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/entrar': {
       id: '/entrar'
@@ -440,55 +542,11 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AdminRouteChildren {
-  AdminIndexRoute: typeof AdminIndexRoute
-  AdminIdRoute: typeof AdminIdRoute
-  AdminClientesRoute: typeof AdminClientesRoute
-  AdminMarcaRoute: typeof AdminMarcaRoute
-  AdminNovoRoute: typeof AdminNovoRoute
-  AdminPagamentosRoute: typeof AdminPagamentosRoute
-}
-
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminIndexRoute: AdminIndexRoute,
-  AdminIdRoute: AdminIdRoute,
-  AdminClientesRoute: AdminClientesRoute,
-  AdminMarcaRoute: AdminMarcaRoute,
-  AdminNovoRoute: AdminNovoRoute,
-  AdminPagamentosRoute: AdminPagamentosRoute,
-}
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
-
-interface ClienteRouteChildren {
-  ClienteIndexRoute: typeof ClienteIndexRoute
-  ClienteIdRoute: typeof ClienteIdRoute
-  ClienteMarcaRoute: typeof ClienteMarcaRoute
-  ClienteNovoRoute: typeof ClienteNovoRoute
-}
-
-const ClienteRouteChildren: ClienteRouteChildren = {
-  ClienteIndexRoute: ClienteIndexRoute,
-  ClienteIdRoute: ClienteIdRoute,
-  ClienteMarcaRoute: ClienteMarcaRoute,
-  ClienteNovoRoute: ClienteNovoRoute,
-}
-const ClienteRouteWithChildren = ClienteRoute._addFileChildren(ClienteRouteChildren)
-
-interface VAgencySlugRouteChildren {
-  VAgencySlugIndexRoute: typeof VAgencySlugIndexRoute
-  VAgencySlugImovelSlugRoute: typeof VAgencySlugImovelSlugRoute
-}
-
-const VAgencySlugRouteChildren: VAgencySlugRouteChildren = {
-  VAgencySlugIndexRoute: VAgencySlugIndexRoute,
-  VAgencySlugImovelSlugRoute: VAgencySlugImovelSlugRoute,
-}
-const VAgencySlugRouteWithChildren = VAgencySlugRoute._addFileChildren(VAgencySlugRouteChildren)
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   ClienteRoute: typeof ClienteRouteWithChildren
+  CorretorRoute: typeof CorretorRoute
   EntrarRoute: typeof EntrarRoute
   ImoveisRoute: typeof ImoveisRoute
   ImovelSlugRoute: typeof ImovelSlugRoute
@@ -501,6 +559,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   ClienteRoute: ClienteRouteWithChildren,
+  CorretorRoute: CorretorRoute,
   EntrarRoute: EntrarRoute,
   ImoveisRoute: ImoveisRoute,
   ImovelSlugRoute: ImovelSlugRoute,
@@ -516,9 +575,9 @@ export const routeTree = rootRouteImport
 import type { getRouter } from './router.tsx'
 import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
+ interface Register {
+  ssr: true
+  router: Awaited<ReturnType<typeof getRouter>>
+  config: Awaited<ReturnType<typeof startInstance.getOptions>>
+ }
 }
