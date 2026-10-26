@@ -14,6 +14,186 @@ export type Database = {
   }
   public: {
     Tables: {
+      crm_leads: {
+        Row: {
+          id: string
+          agency_id: string
+          property_id: string | null
+          assigned_agent_id: string | null
+          name: string
+          phone: string
+          email: string | null
+          source: "manual" | "site" | "whatsapp" | "instagram" | "indicacao" | "outro"
+          stage: "novo" | "contato" | "visita" | "proposta" | "negociacao" | "ganho" | "perdido"
+          budget_brl: number | null
+          notes: string
+          next_contact_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          agency_id: string
+          property_id?: string | null
+          assigned_agent_id?: string | null
+          name: string
+          phone?: string
+          email?: string | null
+          source?: "manual" | "site" | "whatsapp" | "instagram" | "indicacao" | "outro"
+          stage?: "novo" | "contato" | "visita" | "proposta" | "negociacao" | "ganho" | "perdido"
+          budget_brl?: number | null
+          notes?: string
+          next_contact_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          agency_id?: string
+          property_id?: string | null
+          assigned_agent_id?: string | null
+          name?: string
+          phone?: string
+          email?: string | null
+          source?: "manual" | "site" | "whatsapp" | "instagram" | "indicacao" | "outro"
+          stage?: "novo" | "contato" | "visita" | "proposta" | "negociacao" | "ganho" | "perdido"
+          budget_brl?: number | null
+          notes?: string
+          next_contact_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_visits: {
+        Row: {
+          id: string
+          agency_id: string
+          lead_id: string
+          property_id: string
+          scheduled_at: string
+          status: "agendada" | "realizada" | "cancelada"
+          notes: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          agency_id: string
+          lead_id: string
+          property_id: string
+          scheduled_at: string
+          status?: "agendada" | "realizada" | "cancelada"
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          agency_id?: string
+          lead_id?: string
+          property_id?: string
+          scheduled_at?: string
+          status?: "agendada" | "realizada" | "cancelada"
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_deals: {
+        Row: {
+          id: string
+          agency_id: string
+          lead_id: string
+          property_id: string | null
+          title: string
+          amount_brl: number
+          status: "proposta" | "negociacao" | "ganho" | "perdido"
+          expected_close_date: string | null
+          closed_at: string | null
+          notes: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          agency_id: string
+          lead_id: string
+          property_id?: string | null
+          title: string
+          amount_brl?: number
+          status?: "proposta" | "negociacao" | "ganho" | "perdido"
+          expected_close_date?: string | null
+          closed_at?: string | null
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          agency_id?: string
+          lead_id?: string
+          property_id?: string | null
+          title?: string
+          amount_brl?: number
+          status?: "proposta" | "negociacao" | "ganho" | "perdido"
+          expected_close_date?: string | null
+          closed_at?: string | null
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_salespeople: {
+        Row: {
+          id: string
+          agency_id: string
+          user_id: string
+          name: string
+          email: string
+          active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          agency_id: string
+          user_id: string
+          name: string
+          email: string
+          active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          agency_id?: string
+          user_id?: string
+          name?: string
+          email?: string
+          active?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      crm_settings: {
+        Row: {
+          agency_id: string
+          plan: "essencial" | "profissional" | "premium" | "personalizado"
+          max_users: number
+        }
+        Insert: {
+          agency_id: string
+          plan?: "essencial" | "profissional" | "premium" | "personalizado"
+          max_users?: number
+        }
+        Update: {
+          agency_id?: string
+          plan?: "essencial" | "profissional" | "premium" | "personalizado"
+          max_users?: number
+        }
+        Relationships: []
+      }
       agencies: {
         Row: {
           about: string
@@ -318,6 +498,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      crm_assign_salesperson: { Args: { _agency: string; _email: string; _name: string }; Returns: string }
+      crm_toggle_salesperson: { Args: { _agent: string; _active: boolean }; Returns: undefined }
+      crm_is_agent: { Args: { _agency: string }; Returns: boolean }
+      crm_is_manager: { Args: { _agency: string }; Returns: boolean }
+      crm_is_owner: { Args: { _agency: string }; Returns: boolean }
+      crm_count_seats: { Args: { _agency: string }; Returns: number }
+      crm_max_users: { Args: { _agency: string }; Returns: number }
       assign_agency_member: {
         Args: { _agency_id: string; _email: string; _role: string }
         Returns: string
