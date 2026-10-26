@@ -642,6 +642,14 @@ export type Database = {
       }
     }
     Views: {
+      public_agency_profiles: {
+        Row: Database["public"]["Tables"]["agencies"]["Row"]
+        Relationships: []
+      }
+      public_property_listings: {
+        Row: Database["public"]["Tables"]["properties"]["Row"]
+        Relationships: []
+      }
       [_ in never]: never
     }
     Functions: {

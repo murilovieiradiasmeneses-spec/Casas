@@ -3,9 +3,9 @@ import type { CSSProperties } from "react";
 import type { Agency } from "@/lib/properties";
 
 export async function getPublicAgency(slug: string): Promise<Agency | null> {
-  const { data, error } = await supabase.from("agencies").select("*").eq("slug", slug).eq("active", true).maybeSingle();
+  const { data, error } = await supabase.from("public_agency_profiles").select("*").eq("slug", slug).eq("active", true).maybeSingle();
   if (error) throw error;
-  return data;
+  return data as Agency | null;
 }
 
 export function logoName(agency: Agency) {

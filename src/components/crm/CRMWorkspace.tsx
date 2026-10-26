@@ -72,7 +72,9 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
         supabase.from("crm_visits").select("*").eq("agency_id",agencyId).order("scheduled_at",{ascending:true}),
         supabase.from("crm_deals").select("*").eq("agency_id",agencyId).order("created_at",{ascending:false}),
         supabase.from("crm_salespeople").select("*").eq("agency_id",agencyId).order("name"),
-        supabase.from("properties").select("id,title").eq("agency_id",agencyId).order("title"),
+        isBroker
+          ? supabase.from("public_property_listings").select("id,title").eq("agency_id",agencyId).order("title")
+          : supabase.from("properties").select("id,title").eq("agency_id",agencyId).order("title"),
       ]);
       for(const item of [a,b,c,d,e])if(item.error)throw item.error;
       let settings: CRMSettings|null=null, seats=0;

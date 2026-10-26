@@ -103,7 +103,7 @@ export function parseFilters(search: Record<string, unknown>): Filters {
 }
 
 export async function fetchPublished(f: Filters = {}, opts: { featuredOnly?: boolean; limit?: number; agencyId?: string } = {}) {
-  let q = supabase.from("properties").select("*").eq("published", true);
+  let q = supabase.from("public_property_listings").select("*").eq("published", true);
   if (opts.agencyId) q = q.eq("agency_id", opts.agencyId);
   if (f.q) {
     const term = f.q.replace(/[%,()]/g, " ");
@@ -126,20 +126,23 @@ export async function fetchPublished(f: Filters = {}, opts: { featuredOnly?: boo
 }
 
 export async function fetchBySlug(slug: string, agencyId?: string) {
-  let query = supabase
-    .from("properties")
-    .select("*, property_images(*), agencies(name, whatsapp)")
-    .eq("slug", slug).eq("published", true);
+  let query = supabase.from("public_property_listings").select("*").eq("slug", slug);
   if (agencyId) query = query.eq("agency_id", agencyId);
-  const { data, error } = await query.maybeSingle();
+  const {data,error} = await query.maybeSingle();
   if (error) throw error;
   if (!data) return null;
-  const images = [...(data.property_images ?? [])].sort((a, b) => a.position - b.position);
-  const urls = await signPaths([data.cover_image_url, ...images.map((i) => i.url)]);
-  const gallery = images.map((i) => ({ id: i.id, url: urls.get(i.url) ?? "" })).filter((i) => i.url);
+  const [img,publicAgency] = await Promise.all([
+    supabase.from("property_images").select("id,url,position").eq("property_id", data.id).order("position"),
+    supabase.from("public_agency_profiles").select("name,whatsapp").eq("id", data.agency_id).maybeSingle(),
+  ]);
+  if (img.error) throw img.error;
+  if (publicAgency.error) throw publicAgency.error;
+  const images = img.data ?? [];
+  const urls = await signPaths([data.cover_image_url, ...images.map(i=>i.url)]);
+  const gallery = images.map(i=>({id:i.id,url:urls.get(i.url)??""})).filter(i=>i.url);
   if (data.cover_image_url) {
-    const idx = images.findIndex((i) => i.url === data.cover_image_url);
-    if (idx > 0) gallery.unshift(gallery.splice(idx, 1)[0]);
+    const idx = images.findIndex(i=>i.url===data.cover_image_url);
+    if (idx > 0) gallery.unshift(gallery.splice(idx,1)[0]);
   }
-  return { property: data as Property, gallery, agency: data.agencies as { name: string; whatsapp: string | null } | null };
+  return {property:data as Property,gallery,agency:publicAgency.data as {name:string;whatsapp:string|null}|null};
 }
