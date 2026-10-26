@@ -643,7 +643,7 @@ export type Database = {
     }
     Views: {
       public_agency_profiles: {
-        Row: Database["public"]["Tables"]["agencies"]["Row"]
+        Row: Omit<Database["public"]["Tables"]["agencies"]["Row"], "created_at" | "custom_domain">
         Relationships: []
       }
       public_property_listings: {

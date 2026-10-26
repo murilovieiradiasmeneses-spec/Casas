@@ -20,7 +20,7 @@ async function loadBroker(){
     .select("id,agency_id,name,email,active").eq("user_id",auth.user.id).eq("active",true);
   if(error)throw error;
   if(!members?.length)return {state:"forbidden" as const};
-  const {data:agencies,error:aError}=await supabase.from("agencies")
+  const {data:agencies,error:aError}=await supabase.from("public_agency_profiles")
     .select("id,name,slug,active").in("id",members.map(m=>m.agency_id)).eq("active",true);
   if(aError)throw aError;
   return {state:"authorized" as const,members:members.filter(m=>agencies?.some(a=>a.id===m.agency_id)),agencies:agencies??[]};
