@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Building2, ExternalLink, Home, Images, Paintbrush, ChartNoAxesCombined } from "lucide-react";
+import { Building2, ExternalLink, Home, Images, Paintbrush, ChartNoAxesCombined, HardDriveDownload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminAgencyContext, type AgencyOption } from "@/contexts/AdminAgencyContext";
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,7 @@ function ClientLayout() {
           <Link to="/cliente/novo" className={nav} activeProps={{ className: "bg-secondary text-foreground shadow-sm" }}><Images className="h-4 w-4" /> Cadastrar imóvel</Link>
           <Link to="/cliente/marca" className={nav} activeProps={{ className: "bg-secondary text-foreground shadow-sm" }}><Paintbrush className="h-4 w-4" /> Identidade visual</Link>
           <Link to="/cliente/crm" className={nav} activeProps={{ className: "bg-secondary text-foreground shadow-sm" }}><ChartNoAxesCombined className="h-4 w-4" /> CRM Comercial</Link>
+          <Link to="/cliente/backup" className={nav} activeProps={{ className: "bg-secondary text-foreground shadow-sm" }}><HardDriveDownload className="h-4 w-4" /> Backup</Link>
         </nav>
         <div className="mt-6"><Outlet /></div>
       </div>

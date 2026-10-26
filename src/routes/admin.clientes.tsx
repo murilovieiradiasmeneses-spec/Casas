@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Building2, UserPlus, ExternalLink, Copy, FolderOpen, Users } from "lucide-react";
+import { Plus, Building2, UserPlus, ExternalLink, Copy, FolderOpen, Users, HardDriveDownload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminAgency } from "@/contexts/AdminAgencyContext";
 import { slugify } from "@/lib/properties";
@@ -111,6 +111,7 @@ function Clients() {
               }}><Copy className="h-3.5 w-3.5" /> Copiar link</Button>
               <Button size="sm" variant="outline" asChild><Link to="/admin" onClick={() => setActiveAgencyId(a.id)}><FolderOpen className="h-4 w-4" /> Imóveis</Link></Button>
               <Button size="sm" variant="outline" asChild><Link to="/admin/marca" onClick={() => setActiveAgencyId(a.id)}>Personalizar</Link></Button>
+              <Button size="sm" variant="outline" asChild><Link to="/admin/backup" onClick={() => setActiveAgencyId(a.id)}><HardDriveDownload className="h-4 w-4"/> Backup</Link></Button>
               <Button size="sm" variant="outline" asChild><Link to="/admin/pagamentos">Pagamento</Link></Button>
               <Button size="sm" variant="outline" onClick={() => toggleActive.mutate({ id: a.id, active: !a.active })} disabled={toggleActive.isPending}>{a.active ? "Suspender" : "Ativar"}</Button>
             </div>

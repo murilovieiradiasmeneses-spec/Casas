@@ -13,7 +13,7 @@ const choices:{id:BackupCadence;title:string;desc:string}[]=[
   {id:"mensal",title:"Mensal",desc:"Salvar uma cópia a cada mês"},
 ];
 export function CompanyBackup() {
-  const {activeAgencyId,agencies}=useAdminAgency();
+  const {activeAgencyId,agencies,isPlatformAdmin}=useAdminAgency();
   const agency=agencies.find(a=>a.id===activeAgencyId);
   const [cadence,setCadence]=useState<BackupCadence>("semanal");
   const [busy,setBusy]=useState(false);
@@ -36,7 +36,7 @@ export function CompanyBackup() {
     try{
       const result=await downloadCompanyBackup(activeAgencyId,cadence,{
         onProgress:setProgress,
-        isMaster:false,
+        isMaster:isPlatformAdmin,
       });
       setLastFile(result.filename);
       toast.success("Arquivo de backup preparado para download.");
