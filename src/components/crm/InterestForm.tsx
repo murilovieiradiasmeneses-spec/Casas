@@ -26,7 +26,7 @@ export function InterestForm({propertyId,agencyName}:{propertyId:string;agencyNa
         _property_id:propertyId,
         _name:name.trim(),
         _phone:phone.trim(),
-        _email:email.trim()||null,
+        _email:email.trim()||undefined,
       });
       if(error)throw error;
       setSuccess(true);

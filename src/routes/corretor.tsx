@@ -34,8 +34,9 @@ function BrokerPortal(){
   if(q.isError)return <div className="mx-auto max-w-md px-4 py-16"><EmptyState title="Erro ao carregar" text="Não foi possível verificar seu acesso." action={<Button onClick={()=>q.refetch()}>Tentar novamente</Button>}/></div>;
   if(q.data?.state==="guest")return <div className="mx-auto max-w-md px-4 py-16"><EmptyState title="Entre no CASAS" text="Acesse com o e-mail cadastrado para o corretor." action={<Button asChild><Link to="/entrar">Entrar</Link></Button>}/></div>;
   if(!q.data||q.data.state!=="authorized"||!q.data.members.length)return <div className="mx-auto max-w-md px-4 py-16"><EmptyState title="Nenhuma carteira ativa" text="Solicite ao gestor sua vinculação como corretor." /></div>;
-  const m=q.data.members.find(m=>m.id===selected)??q.data.members[0];
-  const a=q.data.agencies.find(a=>a.id===m.agency_id);
+  const members=q.data.members, agencies=q.data.agencies;
+  const m=members.find(m=>m.id===selected)??members[0];
+  const a=agencies.find(a=>a.id===m.agency_id);
   async function exit(){await supabase.auth.signOut();qc.clear();navigate({to:"/entrar"});}
   return <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
     <div className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-[26px] border bg-card p-6 shadow-sm">
