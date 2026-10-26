@@ -14,16 +14,208 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agencies: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          slug: string
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          slug: string
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          address: string | null
+          agency_id: string
+          bathrooms: number
+          bedrooms: number
+          built_area: number | null
+          cep: string | null
+          city: string
+          cover_image_url: string | null
+          created_at: string
+          description: string
+          featured: boolean
+          features: string[]
+          id: string
+          land_area: number | null
+          latitude: number | null
+          longitude: number | null
+          neighborhood: string
+          parking: number
+          price: number
+          property_type: string
+          published: boolean
+          purpose: string
+          show_address: boolean
+          slug: string
+          state: string
+          status: string
+          suites: number
+          title: string
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          agency_id: string
+          bathrooms?: number
+          bedrooms?: number
+          built_area?: number | null
+          cep?: string | null
+          city: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string
+          featured?: boolean
+          features?: string[]
+          id?: string
+          land_area?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          neighborhood: string
+          parking?: number
+          price: number
+          property_type: string
+          published?: boolean
+          purpose: string
+          show_address?: boolean
+          slug: string
+          state: string
+          status?: string
+          suites?: number
+          title: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          agency_id?: string
+          bathrooms?: number
+          bedrooms?: number
+          built_area?: number | null
+          cep?: string | null
+          city?: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string
+          featured?: boolean
+          features?: string[]
+          id?: string
+          land_area?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          neighborhood?: string
+          parking?: number
+          price?: number
+          property_type?: string
+          published?: boolean
+          purpose?: string
+          show_address?: boolean
+          slug?: string
+          state?: string
+          status?: string
+          suites?: number
+          title?: string
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_images: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          property_id: string
+          storage_path: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position?: number
+          property_id: string
+          storage_path?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          property_id?: string
+          storage_path?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_images_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +342,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
