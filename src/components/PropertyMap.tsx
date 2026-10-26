@@ -10,12 +10,6 @@ async function loadLeaflet() {
   return L;
 }
 
-function shortPrice(n: number) {
-  if (n >= 1_000_000) return `R$ ${(n / 1_000_000).toFixed(1).replace(".", ",")} mi`;
-  if (n >= 1000) return `R$ ${Math.round(n / 1000)} mil`;
-  return `R$ ${n}`;
-}
-
 function esc(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }

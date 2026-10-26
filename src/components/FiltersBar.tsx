@@ -9,14 +9,14 @@ const sel = "h-11 min-w-0 rounded-xl border border-input bg-card px-3 text-sm fo
 export function FiltersBar({ value, onApply }: { value: Filters; onApply: (f: Filters) => void }) {
   const [f, setF] = useState<Filters>(value);
   const set = (k: keyof Filters, v: string) =>
-    setF((s) => ({ ...s, [k]: v === "" ? undefined : k === "q" || k === "type" || k === "purpose" ? v : Number(v) }));
+    setF((s) => ({ ...s, [k]: v === "" ? undefined : k === "q" || k === "type" || k === "purpose" ? v : k==="offPlan"?v==="true":Number(v) }));
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         onApply(f);
       }}
-      className="grid grid-cols-2 gap-3 rounded-2xl border border-border bg-card p-3 shadow-float sm:p-4 xl:grid-cols-[minmax(150px,2fr)_repeat(5,minmax(0,1fr))_auto]"
+      className="grid grid-cols-2 gap-3 rounded-2xl border border-border bg-card p-3 shadow-float sm:p-4 xl:grid-cols-[minmax(150px,2fr)_repeat(6,minmax(0,1fr))_auto]"
     >
       <Input className="col-span-2 h-11 xl:col-span-1" placeholder="Cidade ou bairro" value={f.q ?? ""} onChange={(e) => set("q", e.target.value)} />
       <select aria-label="Finalidade" className={sel} value={f.purpose ?? ""} onChange={(e) => set("purpose", e.target.value)}>
@@ -24,6 +24,9 @@ export function FiltersBar({ value, onApply }: { value: Filters; onApply: (f: Fi
       </select>
       <select aria-label="Tipo" className={sel} value={f.type ?? ""} onChange={(e) => set("type", e.target.value)}>
         <option value="">Todos os tipos</option><option value="casa">Casa</option><option value="apartamento">Apartamento</option><option value="terreno">Terreno</option>
+      </select>
+      <select aria-label="Na planta" className={sel} value={f.offPlan?"true":""} onChange={e=>set("offPlan",e.target.value)}>
+        <option value="">Prontos e na planta</option><option value="true">Somente na planta</option>
       </select>
       <select aria-label="Dormitórios" className={sel} value={f.bedrooms ?? ""} onChange={(e) => set("bedrooms", e.target.value)}>
         <option value="">Dormitórios</option>{[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}+</option>)}
