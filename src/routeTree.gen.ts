@@ -10,33 +10,149 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as ImoveisRouteImport } from './routes/imoveis'
+import { Route as MapaRouteImport } from './routes/mapa'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AdminIdRouteImport } from './routes/admin.$id'
+import { Route as AdminNovoRouteImport } from './routes/admin.novo'
+import { Route as ImovelSlugRouteImport } from './routes/imovel.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImoveisRoute = ImoveisRouteImport.update({
+  id: '/imoveis',
+  path: '/imoveis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapaRoute = MapaRouteImport.update({
+  id: '/mapa',
+  path: '/mapa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
+  id: '/redefinir-senha',
+  path: '/redefinir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminIdRoute = AdminIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNovoRoute = AdminNovoRouteImport.update({
+  id: '/novo',
+  path: '/novo',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ImovelSlugRoute = ImovelSlugRouteImport.update({
+  id: '/imovel/$slug',
+  path: '/imovel/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/entrar': typeof EntrarRoute
+  '/imoveis': typeof ImoveisRoute
+  '/mapa': typeof MapaRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/admin/$id': typeof AdminIdRoute
+  '/admin/novo': typeof AdminNovoRoute
+  '/imovel/$slug': typeof ImovelSlugRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/entrar': typeof EntrarRoute
+  '/imoveis': typeof ImoveisRoute
+  '/mapa': typeof MapaRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/admin/$id': typeof AdminIdRoute
+  '/admin/novo': typeof AdminNovoRoute
+  '/imovel/$slug': typeof ImovelSlugRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
+  '/entrar': typeof EntrarRoute
+  '/imoveis': typeof ImoveisRoute
+  '/mapa': typeof MapaRoute
+  '/redefinir-senha': typeof RedefinirSenhaRoute
+  '/admin/$id': typeof AdminIdRoute
+  '/admin/novo': typeof AdminNovoRoute
+  '/imovel/$slug': typeof ImovelSlugRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/entrar'
+    | '/imoveis'
+    | '/mapa'
+    | '/redefinir-senha'
+    | '/admin/$id'
+    | '/admin/novo'
+    | '/imovel/$slug'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/entrar'
+    | '/imoveis'
+    | '/mapa'
+    | '/redefinir-senha'
+    | '/admin/$id'
+    | '/admin/novo'
+    | '/imovel/$slug'
+    | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/entrar'
+    | '/imoveis'
+    | '/mapa'
+    | '/redefinir-senha'
+    | '/admin/$id'
+    | '/admin/novo'
+    | '/imovel/$slug'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
+  EntrarRoute: typeof EntrarRoute
+  ImoveisRoute: typeof ImoveisRoute
+  MapaRoute: typeof MapaRoute
+  RedefinirSenhaRoute: typeof RedefinirSenhaRoute
+  ImovelSlugRoute: typeof ImovelSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +164,94 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imoveis': {
+      id: '/imoveis'
+      path: '/imoveis'
+      fullPath: '/imoveis'
+      preLoaderRoute: typeof ImoveisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mapa': {
+      id: '/mapa'
+      path: '/mapa'
+      fullPath: '/mapa'
+      preLoaderRoute: typeof MapaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redefinir-senha': {
+      id: '/redefinir-senha'
+      path: '/redefinir-senha'
+      fullPath: '/redefinir-senha'
+      preLoaderRoute: typeof RedefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/$id': {
+      id: '/admin/$id'
+      path: '/$id'
+      fullPath: '/admin/$id'
+      preLoaderRoute: typeof AdminIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/novo': {
+      id: '/admin/novo'
+      path: '/novo'
+      fullPath: '/admin/novo'
+      preLoaderRoute: typeof AdminNovoRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/imovel/$slug': {
+      id: '/imovel/$slug'
+      path: '/imovel/$slug'
+      fullPath: '/imovel/$slug'
+      preLoaderRoute: typeof ImovelSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminIdRoute: typeof AdminIdRoute
+  AdminNovoRoute: typeof AdminNovoRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIdRoute: AdminIdRoute,
+  AdminNovoRoute: AdminNovoRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
+  EntrarRoute: EntrarRoute,
+  ImoveisRoute: ImoveisRoute,
+  MapaRoute: MapaRoute,
+  RedefinirSenhaRoute: RedefinirSenhaRoute,
+  ImovelSlugRoute: ImovelSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
