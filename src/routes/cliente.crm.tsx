@@ -8,5 +8,5 @@ export const Route = createFileRoute("/cliente/crm")({
 });
 function ClientCRM(){
   const {activeAgencyId,agencies}=useAdminAgency();
-  return <CRMWorkspace agencyId={activeAgencyId} agencyName={agencies.find(a=>a.id===activeAgencyId)?.name??"Imobiliária"}/>;
+  return <CRMWorkspace key={activeAgencyId} agencyId={activeAgencyId} agencyName={agencies.find(a=>a.id===activeAgencyId)?.name??"Imobiliária"}/>;
 }

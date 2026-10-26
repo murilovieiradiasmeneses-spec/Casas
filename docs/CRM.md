@@ -68,3 +68,21 @@ Caso não haja alertas, o CRM exibe discretamente **Tudo em dia por aqui** e nã
 **Privacidade:** `crm_leads.birth_date` é um campo opcional e permanece protegido pelas mesmas políticas RLS de cada carteira. A data de nascimento não é solicitada no formulário público de interesse e não é publicada no site. Recomenda-se registrar apenas com finalidade transparente e base legal apropriada, conforme LGPD.
 
 **Ativação:** executar `drizzle/migrations/0011_crm_lead_birthdays.sql` após as migrações anteriores. Os avisos são gerados **ao acessar a aplicação**: esta versão não envia push, SMS, e-mail ou mensagens de WhatsApp em segundo plano. Não há serviço de cron/automação configurado.
+
+## Convite simplificado de corretor — sem Cloud → Users
+
+Na aba **Equipe** do CRM, o proprietário da empresa ou o Super Admin informa **nome e e-mail**, clica em **Gerar convite de acesso**, copia o link e envia pelo WhatsApp. O endereço segue o formato `/convite?codigo=<token aleatório>`. O link expira após sete dias, só pode ser usado uma vez e está restrito ao e-mail convidado. Ao abrir, o corretor escolhe **Criar senha** (nova conta) ou **Já tenho conta**, confirma o e-mail, e ativa o acesso. Se o provedor tiver confirmação de e-mail ligada, o corretor confirma antes de usar. **Se o cadastro de novos usuários estiver desativado no Supabase Auth**, habilite cadastro por e-mail com confirmação (Auth) para permitir este fluxo; a plataforma não altera essa configuração automaticamente.
+
+O código de convite não fica disponível permanentemente no painel: copiar/compartilhar logo após criar. A tabela interna armazena apenas o hash SHA-256 do token, não o token em claro. A ativação exige login autenticado com e-mail confirmado e confere os limites de usuários por plano. Convites não utilizados reservam temporariamente uma vaga na geração de novos convites. O link é um segredo: compartilhe somente com a pessoa convidada e não o publique.
+
+## Imóveis na planta, renda familiar e sob consulta
+
+No formulário do anúncio, ativar **Imóvel na planta / lançamento** para colocar o selo de lançamento, ou filtrar apenas anúncios na planta. No controle **Valor no anúncio**, escolher:
+
+- **Preço definido**: informar valor em reais, exibido normalmente;
+- **Faixa de renda**: informar renda familiar mensal mínima e máxima (R$); o anúncio mostrará a faixa **como critério de renda, sem tratá-la como preço**;
+- **Sob consulta**: nenhum preço numérico, apenas a mensagem de consulta.
+
+Mapas, cartões, páginas individuais e listas do administrador usam o mesmo formatador de valor. O banco impõe consistência por `price_display_type`, `income_min`, `income_max` e `price`. Um anúncio na planta pode usar qualquer uma das três modalidades. Migração requerida: `drizzle/migrations/0012_offplan_broker_invites.sql`.
+
+**Antes de publicar para clientes:** testar cadastro de um novo corretor e sua confirmação de e-mail com conta de demonstração, limite de assentos, distribuição de leads e a renderização da faixa de renda em telas mobile. Verificar política de privacidade e garantias de financiamento antes de comercializar.
