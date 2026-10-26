@@ -113,3 +113,26 @@ A exportação é sempre um **snapshot completo do momento do clique**. Não há
 Exportação roda no navegador do proprietário; RLS restringe os registros por empresa. O ZIP não inclui senhas, tokens nem credenciais do Supabase. Se alguma mídia obrigatória não puder ser copiada, **não há arquivo parcial**. O limite desta primeira versão é 220 MB por exportação para evitar travamento de memória; bases maiores exigem backup administrado fora do navegador. A importação não é automática.
 
 **Importante:** o arquivo contém dados pessoais (LGPD), deve ser armazenado privadamente e não enviado por WhatsApp para terceiros. Teste a recuperação por procedimento técnico antes de tratar o backup como garantia de restauração.
+
+## E-mail de acesso do cliente alterado pelo Painel Master
+
+Na página **Master → Meus clientes**, cada imobiliária agora oferece **Trocar e-mail**. Selecione a conta atual (proprietário ou editor) e informe o novo endereço. A troca é um **transfer da permissão** entre contas de autenticação, NÃO uma alteração de e-mail dentro do registro global `auth.users`; isso protege contas que tenham acesso a mais de uma empresa.
+
+- Novo e-mail com conta existente e CONFIRMADA: a permissão da imobiliária é transferida imediatamente em transação, sem apagar imóveis, CRM nem identidade visual.
+- Novo e-mail sem conta/sem confirmação: o master cria uma autorização pendente de até **14 dias** e compartilha o link fixo `/acesso-cliente?empresa=<slug>`. O destinatário cria sua própria senha (ou entra com senha existente), confirma o e-mail e ativa a transferência.
+- **Enquanto pendente, o usuário original mantém seu acesso à imobiliária.** Após a ativação, o vínculo antigo com aquela imobiliária é removido, preservando quaisquer acessos dele a outras empresas.
+- Autorizações pendentes aparecem na seção da imobiliária e o master pode cancelá-las. O novo e-mail nunca recebe acesso antes da comprovação de propriedade da conta via confirmação Auth.
+- O procedimento é exclusivo do usuário com papel `admin` de plataforma, verificado no banco pelas funções `master_change_agency_login`, `master_list_agency_login_changes` e `master_cancel_agency_login_change`.
+- O próprio destinatário chama `activate_agency_login_change` somente após autenticação e confirmação do e-mail. A tabela interna `agency_member_email_changes` não tem acesso direto por `anon` nem `authenticated`.
+- Migração: `0019_master_change_client_email.sql`.
+
+## Distribuição de leads para corretores
+
+- **Gestor da imobiliária (proprietário/editor):** no CRM, aba **Leads e distribuição**, cadastra o lead e seleciona **Enviar lead para corretor**. É possível reatribuir ou devolver o lead à carteira da imobiliária.
+- **Corretor:** na página `/corretor`, encontra **Leads recebidos da imobiliária**, um resumo dos novos leads e aviso ao entrar enquanto o lead estiver na etapa **Novo**. Pode abrir os contatos, trabalhar as etapas e gerenciar visitas/negociações dos seus leads.
+- Um corretor **não pode criar um lead independente nem se atribuir leads sem autorização**; o banco aplica política de INSERT apenas para gestores e restringe SELECT/UPDATE ao corretor efetivamente atribuído. A validação das atribuições compara imobiliária e corretor ativos.
+- Lead público captado pelo formulário do imóvel entra na carteira da imobiliária **sem corretor**. O gestor faz a distribuição.
+- O corretor não recebe mensagens automáticas por SMS/WhatsApp, e-mail ou push: por enquanto, os avisos são **dentro do CRM**, que atualiza os registros periodicamente.
+- Migração: `0020_broker_assigned_leads_only.sql`.
+
+Antes de disponibilizar comercialmente, testar em sessão real com duas imobiliárias, um proprietário e dois corretores, incluindo transferência de e-mail com conta nova e existente; simular que o corretor não consegue ver leads dos demais.
