@@ -130,13 +130,14 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
   const brokerAccessUrl=typeof window!=="undefined"
     ? window.location.origin+"/acesso-corretor?empresa="+encodeURIComponent(agencySlug)
     : "/acesso-corretor?empresa="+encodeURIComponent(agencySlug);
-  const notifications=getCRMAlerts({leads,deals,visits});
+  const notifications=getCRMAlerts({leads,deals,visits},new Date(),7,isBroker);
   const metrics=crmMetrics(leads,deals,visits);
   const chartData=revenueByMonth(deals);
   const plan=settings?.plan??"essencial",limit=settings?.max_users??3;
   const agentNameById=(id?:string|null)=>team.find(p=>p.id===id)?.name??"Sem corretor";
   const leadById=(id:string)=>leads.find(l=>l.id===id);
   const propertyName=(id?:string|null)=>properties.find(p=>p.id===id)?.title??"Imóvel não informado";
+  const receivedNewLeads=isBroker?leads.filter(l=>l.stage==="novo").length:0;
   const filtered=leads.filter(l=>[l.name,l.phone,l.email??"",propertyName(l.property_id)]
     .some(s=>s.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR"))));
   const chartStages=LEAD_STAGES.filter(s=>s.id!=="perdido").map(s=>({name:s.name,value:leads.filter(l=>l.stage===s.id).length}));
@@ -148,12 +149,17 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
   })).sort((a,b)=>b.total-a.total);
 
   const updateLead=(id:string,patch:Partial<Lead>)=>run(async()=>supabase.from("crm_leads").update(patch).eq("id",id).eq("agency_id",agencyId),"Lead atualizado.");
+  const forwardLead=(id:string,agentId:string|null)=>run(
+    async()=>supabase.from("crm_leads").update({assigned_agent_id:agentId}).eq("id",id).eq("agency_id",agencyId),
+    agentId?"Lead enviado para o corretor.":"Lead devolvido à carteira da imobiliária."
+  );
   const updateVisit=(id:string,status:Visit["status"])=>run(async()=>supabase.from("crm_visits").update({status}).eq("id",id).eq("agency_id",agencyId),"Visita atualizada.");
   const updateDeal=(d:Deal,status:DealStage)=>run(async()=>supabase.from("crm_deals").update({
     status,closed_at:status==="ganho"?(d.closed_at??new Date().toISOString()):null,
   }).eq("id",d.id).eq("agency_id",agencyId),"Negociação atualizada.");
   const saveLead=async(e:React.FormEvent)=>{
     e.preventDefault();
+    if(isBroker&&!leadDraft?.id)return toast.error("A imobiliária precisa atribuir o lead antes do atendimento.");
     if(!leadDraft?.name?.trim() || leadDraft.name.trim().length<2)return toast.error("Informe o nome do lead.");
     const body={
       agency_id:agencyId,
@@ -233,16 +239,23 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
     <div className="flex flex-wrap items-end justify-between gap-4">
       <div>
         <span className="text-xs font-bold uppercase tracking-[0.17em] text-primary">CASAS · CRM Imobiliário</span>
-        <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">{isBroker?"Minha carteira comercial":"Gestão comercial"}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">{agencyName} · Leads, visitas, negócios e resultados em tempo real.</p>
+        <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">{isBroker?"Leads recebidos da imobiliária":"Gestão comercial"}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{isBroker?agencyName+" · Você vê somente os leads encaminhados pela sua imobiliária.":agencyName+" · Distribua leads, acompanhe visitas e resultados comerciais."}</p>
       </div>
       <div className="flex flex-wrap gap-2">
         <Button variant="outline" onClick={reload}>Atualizar</Button>
-        <Button onClick={()=>{setTab("leads");setLeadDraft({name:"",stage:"novo",source:"manual",assigned_agent_id:isBroker?brokerId:null});}}>
+        {!isBroker&&<Button onClick={()=>{setTab("leads");setLeadDraft({name:"",stage:"novo",source:"manual",assigned_agent_id:null});}}>
           <Plus/> Novo lead
-        </Button>
+        </Button>}
       </div>
     </div>
+    {isBroker&&<button type="button" onClick={()=>setTab("leads")}
+      className="flex w-full flex-wrap items-center justify-between gap-3 rounded-[22px] border border-primary/25 bg-secondary/40 px-5 py-4 text-left hover:bg-secondary/65">
+      <span className="flex items-center gap-3"><UserRound className="h-5 w-5 text-primary"/>
+        <span><strong>{receivedNewLeads} lead{receivedNewLeads===1?"":"s"} novo{receivedNewLeads===1?"":"s"} recebido{receivedNewLeads===1?"":"s"}</strong>
+          <small className="mt-1 block text-muted-foreground">Contatos encaminhados pela imobiliária aguardando atendimento.</small>
+        </span></span><span className="text-sm font-semibold text-primary">Ver meus leads →</span>
+    </button>}
     <CRMNotifications key={agencyId} agencyName={agencyName} alerts={notifications} leads={leads}
       onOpen={alert=>{
         if(alert.target==="leads") {
@@ -333,11 +346,14 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
 
     {tab==="leads" && <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><h3 className="text-2xl">Leads e distribuição</h3><p className="text-sm text-muted-foreground">{leads.length} contatos na carteira</p></div>
+        <div><h3 className="text-2xl">{isBroker?"Leads encaminhados para mim":"Leads e distribuição"}</h3>
+          <p className="text-sm text-muted-foreground">{isBroker
+            ?"Somente contatos atribuídos a você pela imobiliária."
+            :leads.length+" contatos na carteira · selecione Enviar para corretor em cada lead."}</p></div>
         <div className="flex items-center gap-3">
           <div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"/>
             <Input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar cliente ou imóvel" className="w-64 pl-9"/></div>
-          <Button onClick={()=>setLeadDraft({name:"",stage:"novo",source:"manual",assigned_agent_id:isBroker?brokerId:null})}><Plus/> Cadastrar</Button>
+          {!isBroker&&<Button onClick={()=>setLeadDraft({name:"",stage:"novo",source:"manual",assigned_agent_id:null})}><Plus/> Cadastrar</Button>}
         </div>
       </div>
       <div className="flex snap-x gap-4 overflow-x-auto pb-4">
@@ -365,10 +381,14 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
                   value={l.stage} disabled={busy} onChange={e=>void updateLead(l.id,{stage:e.target.value as LeadStage})}>
                   {LEAD_STAGES.map(st=><option key={st.id} value={st.id}>{st.name}</option>)}
                 </select>
-                {!isBroker && <select aria-label={"Corretor de "+l.name} className="mt-2 w-full rounded-lg border bg-background px-2 py-2 text-xs"
-                  value={l.assigned_agent_id??""} disabled={busy} onChange={e=>void updateLead(l.id,{assigned_agent_id:e.target.value||null})}>
-                  <option value="">Sem corretor atribuído</option>{team.filter(a=>a.active).map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>}
+                {!isBroker && <div className="mt-3 rounded-xl border border-primary/20 bg-secondary/30 p-2.5">
+                  <label htmlFor={"forward-"+l.id} className="mb-1.5 block text-xs font-bold text-primary">Enviar lead para corretor</label>
+                  <select id={"forward-"+l.id} aria-label={"Enviar "+l.name+" para corretor"} className="w-full rounded-lg border bg-background px-2 py-2 text-xs"
+                    value={l.assigned_agent_id??""} disabled={busy} onChange={e=>void forwardLead(l.id,e.target.value||null)}>
+                    <option value="">Carteira da imobiliária (não enviado)</option>
+                    {team.filter(a=>a.active).map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
+                  </select>
+                </div>}
               </article>;
             })}
             {!grouped.length&&<div className="rounded-xl border border-dashed px-3 py-7 text-center text-xs text-muted-foreground">Nenhum lead nesta etapa</div>}</div>
