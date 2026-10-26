@@ -16,67 +16,67 @@ export type Database = {
     Tables: {
       agencies: {
         Row: {
-          id: string
-          name: string
-          slug: string
-          whatsapp: string | null
-          email: string | null
-          created_at: string
-          logo_url: string | null
-          hero_url: string | null
-          tagline: string
           about: string
+          active: boolean
           address: string | null
+          background_color: string
+          created_at: string
+          custom_domain: string | null
+          email: string | null
+          hero_text_color: string
+          hero_url: string | null
+          id: string
           instagram: string | null
+          logo_url: string | null
+          name: string
           primary_color: string
           secondary_color: string
-          background_color: string
+          slug: string
+          tagline: string
           text_color: string
-          hero_text_color: string
-          active: boolean
-          custom_domain: string | null
+          whatsapp: string | null
         }
         Insert: {
-          id?: string
-          name: string
-          slug: string
-          whatsapp?: string | null
-          email?: string | null
-          created_at?: string
-          logo_url?: string | null
-          hero_url?: string | null
-          tagline?: string
           about?: string
+          active?: boolean
           address?: string | null
+          background_color?: string
+          created_at?: string
+          custom_domain?: string | null
+          email?: string | null
+          hero_text_color?: string
+          hero_url?: string | null
+          id?: string
           instagram?: string | null
+          logo_url?: string | null
+          name: string
           primary_color?: string
           secondary_color?: string
-          background_color?: string
+          slug: string
+          tagline?: string
           text_color?: string
-          hero_text_color?: string
-          active?: boolean
-          custom_domain?: string | null
+          whatsapp?: string | null
         }
         Update: {
-          id?: string
-          name?: string
-          slug?: string
-          whatsapp?: string | null
-          email?: string | null
-          created_at?: string
-          logo_url?: string | null
-          hero_url?: string | null
-          tagline?: string
           about?: string
+          active?: boolean
           address?: string | null
+          background_color?: string
+          created_at?: string
+          custom_domain?: string | null
+          email?: string | null
+          hero_text_color?: string
+          hero_url?: string | null
+          id?: string
           instagram?: string | null
+          logo_url?: string | null
+          name?: string
           primary_color?: string
           secondary_color?: string
-          background_color?: string
+          slug?: string
+          tagline?: string
           text_color?: string
-          hero_text_color?: string
-          active?: boolean
-          custom_domain?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
@@ -84,55 +84,74 @@ export type Database = {
         Row: {
           agency_id: string
           amount_brl: number
-          billing_frequency: "mensal" | "trimestral" | "anual" | "unico"
-          next_due_date: string | null
-          last_paid_date: string | null
-          payment_status: "nao_definido" | "pendente" | "pago" | "atrasado"
+          billing_frequency: string
           billing_whatsapp: string | null
+          last_paid_date: string | null
+          next_due_date: string | null
           notes: string
+          payment_status: string
           updated_at: string
         }
         Insert: {
           agency_id: string
           amount_brl?: number
-          billing_frequency?: "mensal" | "trimestral" | "anual" | "unico"
-          next_due_date?: string | null
-          last_paid_date?: string | null
-          payment_status?: "nao_definido" | "pendente" | "pago" | "atrasado"
+          billing_frequency?: string
           billing_whatsapp?: string | null
+          last_paid_date?: string | null
+          next_due_date?: string | null
           notes?: string
+          payment_status?: string
           updated_at?: string
         }
         Update: {
           agency_id?: string
           amount_brl?: number
-          billing_frequency?: "mensal" | "trimestral" | "anual" | "unico"
-          next_due_date?: string | null
-          last_paid_date?: string | null
-          payment_status?: "nao_definido" | "pendente" | "pago" | "atrasado"
+          billing_frequency?: string
           billing_whatsapp?: string | null
+          last_paid_date?: string | null
+          next_due_date?: string | null
           notes?: string
+          payment_status?: string
           updated_at?: string
         }
-        Relationships: [{
-          foreignKeyName: "agency_billing_agency_id_fkey"
-          columns: ["agency_id"]
-          isOneToOne: true
-          referencedRelation: "agencies"
-          referencedColumns: ["id"]
-        }]
+        Relationships: [
+          {
+            foreignKeyName: "agency_billing_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: true
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agency_members: {
-        Row: { agency_id: string; user_id: string; role: string; created_at: string }
-        Insert: { agency_id: string; user_id: string; role: string; created_at?: string }
-        Update: { agency_id?: string; user_id?: string; role?: string; created_at?: string }
-        Relationships: [{
-          foreignKeyName: "agency_members_agency_id_fkey"
-          columns: ["agency_id"]
-          isOneToOne: false
-          referencedRelation: "agencies"
-          referencedColumns: ["id"]
-        }]
+        Row: {
+          agency_id: string
+          created_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_members_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       properties: {
         Row: {
@@ -299,16 +318,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      list_agency_users_admin: { Args: Record<string, never>; Returns: { agency_id: string; user_id: string; email: string; role: string }[] }
-      can_manage_agency: { Args: { _agency_id: string }; Returns: boolean }
+      assign_agency_member: {
+        Args: { _agency_id: string; _email: string; _role: string }
+        Returns: string
+      }
       can_edit_brand: { Args: { _agency_id: string }; Returns: boolean }
-      assign_agency_member: { Args: { _agency_id: string; _email: string; _role: string }; Returns: string }
+      can_manage_agency: { Args: { _agency_id: string }; Returns: boolean }
+      can_manage_property_image_path: {
+        Args: { _path: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      list_agency_users_admin: {
+        Args: never
+        Returns: {
+          agency_id: string
+          email: string
+          role: string
+          user_id: string
+        }[]
       }
     }
     Enums: {
