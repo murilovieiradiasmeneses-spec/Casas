@@ -424,7 +424,7 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
                   target="_blank" rel="noopener noreferrer">Enviar pelo WhatsApp</a>
               </Button>
             </div>
-          </div>
+          </div>}
         </article>
       </div>
       <article className={panel}>

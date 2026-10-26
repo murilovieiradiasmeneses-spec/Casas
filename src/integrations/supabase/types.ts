@@ -14,192 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      crm_leads: {
-        Row: {
-          id: string
-          agency_id: string
-          property_id: string | null
-          assigned_agent_id: string | null
-          consent_at: string | null
-          birth_date: string | null
-          name: string
-          phone: string
-          email: string | null
-          source: "manual" | "site" | "whatsapp" | "instagram" | "indicacao" | "outro"
-          stage: "novo" | "contato" | "visita" | "proposta" | "negociacao" | "ganho" | "perdido"
-          budget_brl: number | null
-          notes: string
-          next_contact_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          agency_id: string
-          property_id?: string | null
-          assigned_agent_id?: string | null
-          consent_at?: string | null
-          birth_date?: string | null
-          name: string
-          phone?: string
-          email?: string | null
-          source?: "manual" | "site" | "whatsapp" | "instagram" | "indicacao" | "outro"
-          stage?: "novo" | "contato" | "visita" | "proposta" | "negociacao" | "ganho" | "perdido"
-          budget_brl?: number | null
-          notes?: string
-          next_contact_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          agency_id?: string
-          property_id?: string | null
-          assigned_agent_id?: string | null
-          consent_at?: string | null
-          birth_date?: string | null
-          name?: string
-          phone?: string
-          email?: string | null
-          source?: "manual" | "site" | "whatsapp" | "instagram" | "indicacao" | "outro"
-          stage?: "novo" | "contato" | "visita" | "proposta" | "negociacao" | "ganho" | "perdido"
-          budget_brl?: number | null
-          notes?: string
-          next_contact_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      crm_visits: {
-        Row: {
-          id: string
-          agency_id: string
-          lead_id: string
-          property_id: string
-          scheduled_at: string
-          status: "agendada" | "realizada" | "cancelada"
-          notes: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          agency_id: string
-          lead_id: string
-          property_id: string
-          scheduled_at: string
-          status?: "agendada" | "realizada" | "cancelada"
-          notes?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          agency_id?: string
-          lead_id?: string
-          property_id?: string
-          scheduled_at?: string
-          status?: "agendada" | "realizada" | "cancelada"
-          notes?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      crm_deals: {
-        Row: {
-          id: string
-          agency_id: string
-          lead_id: string
-          property_id: string | null
-          title: string
-          amount_brl: number
-          status: "proposta" | "negociacao" | "ganho" | "perdido"
-          expected_close_date: string | null
-          closed_at: string | null
-          notes: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          agency_id: string
-          lead_id: string
-          property_id?: string | null
-          title: string
-          amount_brl?: number
-          status?: "proposta" | "negociacao" | "ganho" | "perdido"
-          expected_close_date?: string | null
-          closed_at?: string | null
-          notes?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          agency_id?: string
-          lead_id?: string
-          property_id?: string | null
-          title?: string
-          amount_brl?: number
-          status?: "proposta" | "negociacao" | "ganho" | "perdido"
-          expected_close_date?: string | null
-          closed_at?: string | null
-          notes?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      crm_salespeople: {
-        Row: {
-          id: string
-          agency_id: string
-          user_id: string
-          name: string
-          email: string
-          active: boolean
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          agency_id: string
-          user_id: string
-          name: string
-          email: string
-          active?: boolean
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          agency_id?: string
-          user_id?: string
-          name?: string
-          email?: string
-          active?: boolean
-          created_at?: string
-        }
-        Relationships: []
-      }
-      crm_settings: {
-        Row: {
-          agency_id: string
-          plan: "essencial" | "profissional" | "premium" | "personalizado"
-          max_users: number
-        }
-        Insert: {
-          agency_id: string
-          plan?: "essencial" | "profissional" | "premium" | "personalizado"
-          max_users?: number
-        }
-        Update: {
-          agency_id?: string
-          plan?: "essencial" | "profissional" | "premium" | "personalizado"
-          max_users?: number
-        }
-        Relationships: []
-      }
       agencies: {
         Row: {
           about: string
@@ -339,6 +153,321 @@ export type Database = {
           },
         ]
       }
+      crm_broker_invitations: {
+        Row: {
+          agency_id: string
+          created_at: string
+          created_by: string | null
+          email: string
+          expires_at: string
+          id: string
+          name: string
+          revoked_at: string | null
+          token_hash: string
+          used_at: string | null
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          created_by?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          name: string
+          revoked_at?: string | null
+          token_hash: string
+          used_at?: string | null
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          name?: string
+          revoked_at?: string | null
+          token_hash?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_broker_invitations_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_deals: {
+        Row: {
+          agency_id: string
+          amount_brl: number
+          closed_at: string | null
+          created_at: string
+          expected_close_date: string | null
+          id: string
+          lead_id: string
+          notes: string
+          property_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          amount_brl?: number
+          closed_at?: string | null
+          created_at?: string
+          expected_close_date?: string | null
+          id?: string
+          lead_id: string
+          notes?: string
+          property_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          amount_brl?: number
+          closed_at?: string | null
+          created_at?: string
+          expected_close_date?: string | null
+          id?: string
+          lead_id?: string
+          notes?: string
+          property_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_deals_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deals_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_leads: {
+        Row: {
+          agency_id: string
+          assigned_agent_id: string | null
+          birth_date: string | null
+          budget_brl: number | null
+          consent_at: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          next_contact_at: string | null
+          notes: string
+          phone: string
+          property_id: string | null
+          source: string
+          stage: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          assigned_agent_id?: string | null
+          birth_date?: string | null
+          budget_brl?: number | null
+          consent_at?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          next_contact_at?: string | null
+          notes?: string
+          phone?: string
+          property_id?: string | null
+          source?: string
+          stage?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          assigned_agent_id?: string | null
+          birth_date?: string | null
+          budget_brl?: number | null
+          consent_at?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          next_contact_at?: string | null
+          notes?: string
+          phone?: string
+          property_id?: string | null
+          source?: string
+          stage?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_leads_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_assigned_agent_id_fkey"
+            columns: ["assigned_agent_id"]
+            isOneToOne: false
+            referencedRelation: "crm_salespeople"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_salespeople: {
+        Row: {
+          active: boolean
+          agency_id: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          agency_id: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          agency_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_salespeople_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_settings: {
+        Row: {
+          agency_id: string
+          max_users: number
+          plan: string
+        }
+        Insert: {
+          agency_id: string
+          max_users?: number
+          plan?: string
+        }
+        Update: {
+          agency_id?: string
+          max_users?: number
+          plan?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_settings_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: true
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_visits: {
+        Row: {
+          agency_id: string
+          created_at: string
+          id: string
+          lead_id: string
+          notes: string
+          property_id: string
+          scheduled_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          notes?: string
+          property_id: string
+          scheduled_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          notes?: string
+          property_id?: string
+          scheduled_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_visits_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_visits_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_visits_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       properties: {
         Row: {
           address: string | null
@@ -354,17 +483,17 @@ export type Database = {
           featured: boolean
           features: string[]
           id: string
+          income_max: number | null
+          income_min: number | null
+          is_off_plan: boolean
           land_area: number | null
           latitude: number | null
           longitude: number | null
           neighborhood: string
           parking: number
           price: number
+          price_display_type: string
           property_type: string
-          is_off_plan: boolean
-          price_display_type: "price" | "income_range" | "consultation"
-          income_min: number | null
-          income_max: number | null
           published: boolean
           purpose: string
           show_address: boolean
@@ -390,17 +519,17 @@ export type Database = {
           featured?: boolean
           features?: string[]
           id?: string
+          income_max?: number | null
+          income_min?: number | null
+          is_off_plan?: boolean
           land_area?: number | null
           latitude?: number | null
           longitude?: number | null
           neighborhood: string
           parking?: number
           price: number
+          price_display_type?: string
           property_type: string
-          is_off_plan?: boolean
-          price_display_type?: "price" | "income_range" | "consultation"
-          income_min?: number | null
-          income_max?: number | null
           published?: boolean
           purpose: string
           show_address?: boolean
@@ -426,17 +555,17 @@ export type Database = {
           featured?: boolean
           features?: string[]
           id?: string
+          income_max?: number | null
+          income_min?: number | null
+          is_off_plan?: boolean
           land_area?: number | null
           latitude?: number | null
           longitude?: number | null
           neighborhood?: string
           parking?: number
           price?: number
+          price_display_type?: string
           property_type?: string
-          is_off_plan?: boolean
-          price_display_type?: "price" | "income_range" | "consultation"
-          income_min?: number | null
-          income_max?: number | null
           published?: boolean
           purpose?: string
           show_address?: boolean
@@ -516,17 +645,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      crm_create_broker_invite: { Args: { _agency: string; _email: string; _name: string }; Returns: string }
-      crm_invite_details: { Args: { _token: string }; Returns: { agency_name: string; email: string; broker_name: string; expires_at: string }[] }
-      crm_redeem_broker_invite: { Args: { _token: string }; Returns: boolean }
-      crm_capture_interest: { Args: { _property_id: string; _name: string; _phone: string; _email?: string | null }; Returns: boolean }
-      crm_assign_salesperson: { Args: { _agency: string; _email: string; _name: string }; Returns: string }
-      crm_toggle_salesperson: { Args: { _agent: string; _active: boolean }; Returns: undefined }
-      crm_is_agent: { Args: { _agency: string }; Returns: boolean }
-      crm_is_manager: { Args: { _agency: string }; Returns: boolean }
-      crm_is_owner: { Args: { _agency: string }; Returns: boolean }
-      crm_count_seats: { Args: { _agency: string }; Returns: number }
-      crm_max_users: { Args: { _agency: string }; Returns: number }
       assign_agency_member: {
         Args: { _agency_id: string; _email: string; _role: string }
         Returns: string
@@ -536,6 +654,43 @@ export type Database = {
       can_manage_property_image_path: {
         Args: { _path: string }
         Returns: boolean
+      }
+      crm_assign_salesperson: {
+        Args: { _agency: string; _email: string; _name: string }
+        Returns: string
+      }
+      crm_can_read_lead: { Args: { _lead: string }; Returns: boolean }
+      crm_capture_interest: {
+        Args: {
+          _email?: string
+          _name: string
+          _phone: string
+          _property_id: string
+        }
+        Returns: boolean
+      }
+      crm_count_seats: { Args: { _agency: string }; Returns: number }
+      crm_create_broker_invite: {
+        Args: { _agency: string; _email: string; _name: string }
+        Returns: string
+      }
+      crm_invite_details: {
+        Args: { _token: string }
+        Returns: {
+          agency_name: string
+          broker_name: string
+          email: string
+          expires_at: string
+        }[]
+      }
+      crm_is_agent: { Args: { _agency: string }; Returns: boolean }
+      crm_is_manager: { Args: { _agency: string }; Returns: boolean }
+      crm_is_owner: { Args: { _agency: string }; Returns: boolean }
+      crm_max_users: { Args: { _agency: string }; Returns: number }
+      crm_redeem_broker_invite: { Args: { _token: string }; Returns: boolean }
+      crm_toggle_salesperson: {
+        Args: { _active: boolean; _agent: string }
+        Returns: undefined
       }
       has_role: {
         Args: {
