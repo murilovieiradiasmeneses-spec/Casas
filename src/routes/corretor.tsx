@@ -43,7 +43,7 @@ function BrokerPortal(){
       <div><p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary"><UserRound className="h-4 w-4"/> Área do corretor</p>
         <h1 className="mt-3 text-3xl font-bold">{m.name}</h1><p className="mt-1 text-sm text-muted-foreground">{a?.name} · Seus leads e negociações</p></div>
       <div className="flex items-center gap-3">
-        {q.data.members.length>1&&<select aria-label="Selecionar imobiliária" className="h-11 rounded-xl border bg-background px-3 text-sm" value={m.id} onChange={e=>setSelected(e.target.value)}>{q.data.members.map(x=><option key={x.id} value={x.id}>{q.data.agencies.find(a=>a.id===x.agency_id)?.name}</option>)}</select>}
+        {members.length>1&&<select aria-label="Selecionar imobiliária" className="h-11 rounded-xl border bg-background px-3 text-sm" value={m.id} onChange={e=>setSelected(e.target.value)}>{members.map(x=><option key={x.id} value={x.id}>{agencies.find(a=>a.id===x.agency_id)?.name}</option>)}</select>}
         <Button variant="outline" onClick={exit}>Sair</Button>
       </div>
     </div>
