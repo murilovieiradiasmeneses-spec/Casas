@@ -26,9 +26,14 @@ import {
 
 type PropertyOption = { id: string; title: string };
 type CRMTab = "visao" | "leads" | "visitas" | "negociacoes" | "equipe";
+type BrokerAuthorization = {
+  id:string;name:string;email:string;state:"ativo"|"autorizado"|"revogado";
+  authorized_at:string;activated_at:string|null;
+};
 type CRMData = {
   leads:Lead[]; visits:Visit[]; deals:Deal[]; team:Salesperson[];
   properties:PropertyOption[]; settings:CRMSettings|null; seats:number;
+  seatsReserved:number;canManageTeam:boolean;authorizations:BrokerAuthorization[];
 };
 type Props = {
   agencyId:string;
@@ -36,6 +41,7 @@ type Props = {
   isMaster?:boolean;
   isBroker?:boolean;
   brokerId?:string;
+  agencySlug?:string;
 };
 const tabs: { key:CRMTab;label:string;icon:typeof Users }[] = [
   {key:"visao",label:"Visão geral",icon:ChartNoAxesCombined},
@@ -52,7 +58,7 @@ const todayLocal=(date:string)=>{
   return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 };
 
-export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,brokerId}:Props) {
+export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,isBroker=false,brokerId}:Props) {
   const qc=useQueryClient();
   const [tab,setTab]=useState<CRMTab>("visao");
   const [busy,setBusy]=useState(false);
@@ -62,7 +68,6 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
   const [dealDraft,setDealDraft]=useState<Partial<Deal>|null>(null);
   const [agentName,setAgentName]=useState("");
   const [agentEmail,setAgentEmail]=useState("");
-  const [inviteLink,setInviteLink]=useState("");
   const q=useQuery({
     queryKey:["casas-crm",agencyId,isBroker,brokerId],
     enabled:!!agencyId && (!isBroker||!!brokerId),
@@ -77,19 +82,27 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
           : supabase.from("properties").select("id,title").eq("agency_id",agencyId).order("title"),
       ]);
       for(const item of [a,b,c,d,e])if(item.error)throw item.error;
-      let settings: CRMSettings|null=null, seats=0;
+      let settings:CRMSettings|null=null,seats=0,seatsReserved=0,canManageTeam=false;
+      let authorizations:BrokerAuthorization[]=[];
       if(!isBroker){
-        const [f,g]=await Promise.all([
+        const [settingsResult,seatsResult,ownerResult,reservedResult]=await Promise.all([
           supabase.from("crm_settings").select("*").eq("agency_id",agencyId).maybeSingle(),
           supabase.rpc("crm_count_seats",{_agency:agencyId}),
+          supabase.rpc("crm_is_owner",{_agency:agencyId}),
+          supabase.rpc("crm_reserved_seats",{_agency:agencyId}),
         ]);
-        if(f.error)throw f.error;
-        if(g.error)throw g.error;
-        settings=f.data;
-        seats=g.data??0;
+        for(const result of [settingsResult,seatsResult,ownerResult,reservedResult])if(result.error)throw result.error;
+        settings=settingsResult.data;
+        seats=seatsResult.data??0;seatsReserved=reservedResult.data??0;
+        canManageTeam=!!ownerResult.data;
+        if(canManageTeam){
+          const approved=await supabase.rpc("crm_list_authorized_brokers",{_agency:agencyId});
+          if(approved.error)throw approved.error;
+          authorizations=(approved.data??[]) as BrokerAuthorization[];
+        }
       }
       return {leads:a.data??[],visits:b.data??[],deals:c.data??[],
-        team:d.data??[],properties:(e.data??[]).filter((x):x is PropertyOption=>!!x.id&&!!x.title),settings,seats};
+        team:d.data??[],properties:e.data??[],settings,seats,seatsReserved,canManageTeam,authorizations};
     },
     refetchInterval:45000,
     staleTime:10000,
@@ -113,7 +126,10 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
     <p className="mt-2 text-sm text-muted-foreground">Verifique o banco e suas permissões. {q.error instanceof Error?q.error.message:""}</p>
     <Button className="mt-4" onClick={()=>q.refetch()}>Tentar novamente</Button>
   </div>;
-  const {leads,visits,deals,team,properties,settings,seats}=q.data;
+  const {leads,visits,deals,team,properties,settings,seats,seatsReserved,canManageTeam,authorizations}=q.data;
+  const brokerAccessUrl=typeof window!=="undefined"
+    ? window.location.origin+"/acesso-corretor?empresa="+encodeURIComponent(agencySlug)
+    : "/acesso-corretor?empresa="+encodeURIComponent(agencySlug);
   const notifications=getCRMAlerts({leads,deals,visits});
   const metrics=crmMetrics(leads,deals,visits);
   const chartData=revenueByMonth(deals);
@@ -185,27 +201,29 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
   };
   const addAgent=async(e:React.FormEvent)=>{
     e.preventDefault();
+    if(!canManageTeam)return toast.error("Somente o proprietário pode autorizar corretores.");
     if(!agentEmail.includes("@")||agentName.trim().length<2)return toast.error("Informe nome e e-mail válidos.");
     setBusy(true);
-    setInviteLink("");
-    try {
-      const {data,error}=await supabase.rpc("crm_create_broker_invite",{
+    try{
+      const {data,error}=await supabase.rpc("crm_authorize_broker",{
         _agency:agencyId,_email:agentEmail.trim(),_name:agentName.trim(),
       });
       if(error)throw error;
-      const link=window.location.origin+"/convite?codigo="+encodeURIComponent(data);
-      setInviteLink(link);
-      setAgentName("");setAgentEmail("");
-      try{await navigator.clipboard.writeText(link);toast.success("Convite gerado e copiado. Envie ao corretor.");}
-      catch{toast.success("Convite criado. Copie o link abaixo e envie ao corretor.");}
-    }catch(error){toast.error((error as Error).message);}
+      toast.success(data==="ativo"?"Acesso ativado para a conta existente.":"E-mail autorizado. Envie ao corretor o link fixo da imobiliária.");
+      setAgentName("");setAgentEmail("");reload();
+    }catch(e){toast.error((e as Error).message);}
     finally{setBusy(false);}
+  };
+  const revokeAuthorization=async(email:string)=>{
+    if(!canManageTeam)return;
+    if(!window.confirm("Revogar o acesso do corretor "+email+"?"))return;
+    await run(()=>supabase.rpc("crm_revoke_broker",{_agency:agencyId,_email:email}),"Acesso revogado.");
   };
   const changePlan=async(next:string)=>{
     if(!isMaster)return;
     const p=PLANS.find(x=>x.id===next);
     if(!p)return;
-    if(p.limit<seats){toast.error("Este plano comporta menos usuários do que os atuais. Desative usuários antes.");return;}
+    if(p.limit<seatsReserved){toast.error("Este plano comporta menos usuários do que os atuais. Desative usuários antes.");return;}
     await run(()=>supabase.from("crm_settings").upsert({
       agency_id:agencyId,plan:p.id,max_users:p.limit,
     },{onConflict:"agency_id"}),"Limite do CRM atualizado.");
@@ -393,8 +411,8 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
       <div className="grid gap-5 lg:grid-cols-2">
         <article className={panel}>
           <div className="flex items-center gap-3"><ShieldCheck className="h-5 w-5 text-primary"/><h4 className="text-lg">Plano e limite de acessos</h4></div>
-          <p className="mt-4 text-3xl font-bold">{seats} <span className="text-lg font-medium text-muted-foreground">/ {limit} usuários</span></p>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{width:Math.min(100,(seats/Math.max(limit,1))*100)+"%"}}/></div>
+          <p className="mt-4 text-3xl font-bold">{seatsReserved} <span className="text-lg font-medium text-muted-foreground">/ {limit} acessos</span></p><p className="mt-1 text-xs text-muted-foreground">{seats} ativos · {Math.max(0,seatsReserved-seats)} autorizações aguardando ativação</p>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{width:Math.min(100,(seatsReserved/Math.max(limit,1))*100)+"%"}}/></div>
           <p className="mt-3 text-xs text-muted-foreground">Contagem inclui responsáveis e editores da imobiliária, além dos corretores ativos.</p>
           <p className="mt-2 text-sm font-semibold">Plano atual: {PLANS.find(p=>p.id===plan)?.name??"Personalizado"}</p>
           {isMaster?<div className="mt-4 space-y-2"><Label>Alterar plano pelo painel master</Label>
