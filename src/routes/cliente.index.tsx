@@ -62,12 +62,12 @@ function Dashboard() {
     <div>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {metrics.map((m) => (
-          <div key={m.label} className="rounded-xl border bg-card p-5"><p className="text-xs text-muted-foreground">{m.label}</p><p className="mt-1 font-display text-4xl">{q.isLoading ? "–" : m.v}</p></div>
+          <div key={m.label} className="rounded-[20px] border border-border/70 bg-card p-6 shadow-sm"><p className="text-xs text-muted-foreground">{m.label}</p><p className="mt-2 font-display text-4xl font-bold tracking-[-0.055em]">{q.isLoading ? "–" : m.v}</p></div>
         ))}
       </div>
 
       <div className="mt-8 flex items-center justify-between">
-        <h2 className="text-3xl">Imóveis da minha empresa</h2>
+        <h2 className="text-3xl md:text-4xl">Imóveis da minha empresa</h2>
         <Button asChild><Link to="/cliente/novo">Novo imóvel</Link></Button>
       </div>
 
@@ -77,7 +77,7 @@ function Dashboard() {
         ) : !list.length ? (
           <EmptyState title="Nenhum anúncio ainda" text="Cadastre o primeiro imóvel para começar." action={<Button asChild><Link to="/cliente/novo">Cadastrar imóvel</Link></Button>} />
         ) : (
-          <div className="divide-y rounded-xl border bg-card">
+          <div className="divide-y overflow-hidden rounded-[22px] border border-border/70 bg-card shadow-sm">
             {list.map((p) => (
               <div key={p.id} className="flex flex-col gap-3 p-4 md:flex-row md:items-center">
                 <div className="min-w-0 flex-1">

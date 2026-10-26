@@ -23,9 +23,11 @@ function Catalog() {
   const navigate = useNavigate({ from: "/imoveis" });
   const q = useQuery({ queryKey: ["catalog", filters], queryFn: () => fetchPublished(filters) });
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
-      <h1 className="text-4xl md:text-5xl">Explorar imóveis</h1>
-      <div className="mt-6"><FiltersBar key={JSON.stringify(filters)} value={filters} onApply={(f) => navigate({ search: f })} /></div>
+    <div className="mx-auto max-w-7xl px-4 py-12 md:px-8 md:py-16">
+      <p className="eyebrow text-primary">Nosso catálogo</p>
+      <h1 className="mt-3 text-4xl md:text-6xl">Imóveis para o seu próximo capítulo<span className="text-primary">.</span></h1>
+      <p className="mt-4 text-sm text-muted-foreground md:text-base">Encontre sua próxima casa, apartamento ou terreno com filtros intuitivos e visualização no mapa.</p>
+      <div className="mt-8"><FiltersBar key={JSON.stringify(filters)} value={filters} onApply={(f) => navigate({ search: f })} /></div>
       <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
         <span>{q.data ? `${q.data.length} imóvel(is)` : "\u00a0"}</span>
         <Link to="/mapa" search={filters} className="font-medium text-foreground underline-offset-4 hover:underline">Ver no mapa</Link>

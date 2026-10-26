@@ -51,10 +51,10 @@ function AdminLayout() {
   const activeAgencyId = agencies.find((a) => a.id === selected)?.id ?? agencies[0]?.id ?? "";
   return (
     <AdminAgencyContext.Provider value={{ activeAgencyId, agencies, isPlatformAdmin: q.data.isPlatformAdmin, setActiveAgencyId: setSelected }}>
-      <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b pb-5">
+      <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-5 rounded-[24px] border border-border/70 bg-card px-5 py-5 shadow-soft md:px-7">
           <div className="flex flex-wrap items-center gap-4">
-            <Link to="/admin/clientes" className="font-display text-2xl">CASAS · Painel Master</Link>
+            <Link to="/admin/clientes" className="font-display text-xl font-bold tracking-[-0.055em] md:text-2xl">CASAS <span className="text-primary">/</span> Painel Master</Link>
             <Link to="/admin/novo" className="text-sm hover:underline">Cadastrar imóvel</Link>
             <Link to="/admin/marca" className="text-sm hover:underline">Identidade visual</Link>
             {q.data.isPlatformAdmin && <Link to="/admin/clientes" className="text-sm hover:underline">Meus clientes</Link>}
@@ -65,9 +65,9 @@ function AdminLayout() {
             <Button onClick={signOut} variant="outline" size="sm">Sair</Button>
           </div>
         </div>
-        <div className="mb-7 flex flex-wrap items-center gap-3 rounded-xl border bg-card p-4">
+        <div className="mb-7 flex flex-wrap items-center gap-3 rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
           <label htmlFor="agency-active" className="text-sm font-medium">Imobiliária em gestão:</label>
-          <select id="agency-active" className="min-w-52 rounded-md border bg-background px-3 py-2 text-sm" value={activeAgencyId} onChange={(e) => { setSelected(e.target.value); navigate({ to: "/admin" }); }}>
+          <select id="agency-active" className="min-w-52 rounded-xl border bg-background px-4 py-3 text-sm font-semibold" value={activeAgencyId} onChange={(e) => { setSelected(e.target.value); navigate({ to: "/admin" }); }}>
             {agencies.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
           {activeAgencyId && <a href={"/v/" + agencies.find((a) => a.id === activeAgencyId)?.slug} target="_blank" rel="noreferrer" className="text-sm text-primary underline-offset-4 hover:underline">Abrir vitrine ↗</a>}

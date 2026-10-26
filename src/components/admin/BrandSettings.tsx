@@ -97,9 +97,9 @@ export function BrandSettings() {
   return (
     <div className="space-y-6">
       <div><p className="text-xs font-semibold uppercase tracking-widest text-primary">Personalização white-label</p><h1 className="mt-2 text-4xl">Identidade da imobiliária</h1><p className="mt-2 text-sm text-muted-foreground">Logo, capa, contatos, cores do site e cor das fontes personalizadas por cliente. As alterações só afetam esta empresa.</p></div>
-      <div className="grid gap-7 lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <form onSubmit={save} className="space-y-6">
-          <section className="space-y-4 rounded-xl border bg-card p-5">
+          <section className="space-y-4 rounded-[22px] border border-border/70 bg-card p-6 shadow-sm">
             <h2 className="text-2xl">Dados da empresa</h2>
             {field("name", "Nome da imobiliária / construtora")}
             {field("tagline", "Frase principal da vitrine")}
@@ -108,7 +108,7 @@ export function BrandSettings() {
             {field("address", "Endereço comercial")}
             {field("instagram", "Instagram", "@imobiliaria")}
           </section>
-          <section className="space-y-4 rounded-xl border bg-card p-5">
+          <section className="space-y-4 rounded-[22px] border border-border/70 bg-card p-6 shadow-sm">
             <h2 className="text-2xl">Logotipo e capa</h2>
             {(["logo_url", "hero_url"] as const).map((key) => (
               <div key={key} className="space-y-2 rounded-lg border p-4">
@@ -119,7 +119,7 @@ export function BrandSettings() {
               </div>
             ))}
           </section>
-          <section className="space-y-4 rounded-xl border bg-card p-5">
+          <section className="space-y-4 rounded-[22px] border border-border/70 bg-card p-6 shadow-sm">
             <h2 className="text-2xl">Paleta de cores</h2>
             {([
               ["primary_color", "Cor principal"],
@@ -139,7 +139,7 @@ export function BrandSettings() {
         </form>
         <aside className="lg:sticky lg:top-5 lg:self-start">
           <p className="mb-3 text-sm font-semibold">Prévia da identidade</p>
-          <div style={brandingStyle({ ...q.data.agency, ...form })} className="overflow-hidden rounded-xl border bg-background text-foreground">
+          <div style={brandingStyle({ ...q.data.agency, ...form })} className="overflow-hidden rounded-[24px] border bg-background text-foreground shadow-float">
             <div className="flex min-h-20 items-center justify-between gap-2 bg-card p-4">{form.logo_url ? <img src={form.logo_url} alt="" className="max-h-12 max-w-32 object-contain" /> : <span className="font-display text-2xl">{form.name}</span>}<span className="text-xs">Menu</span></div>
             <div className="relative flex min-h-56 items-end bg-cover bg-center p-5" style={{ backgroundImage: form.hero_url ? "linear-gradient(to top, #0009, #0003), url(" + JSON.stringify(form.hero_url) + ")" : "linear-gradient(125deg, " + form.secondary_color + ", " + form.primary_color + ")" }}>
               <h3 className="font-display text-3xl" style={{ color: "var(--hero-text)" }}>{form.tagline}</h3>
