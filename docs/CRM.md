@@ -86,3 +86,30 @@ No formulário do anúncio, ativar **Imóvel na planta / lançamento** para colo
 Mapas, cartões, páginas individuais e listas do administrador usam o mesmo formatador de valor. O banco impõe consistência por `price_display_type`, `income_min`, `income_max` e `price`. Um anúncio na planta pode usar qualquer uma das três modalidades. Migração requerida: `drizzle/migrations/0012_offplan_broker_invites.sql`.
 
 **Antes de publicar para clientes:** testar cadastro de um novo corretor e sua confirmação de e-mail com conta de demonstração, limite de assentos, distribuição de leads e a renderização da faixa de renda em telas mobile. Verificar política de privacidade e garantias de financiamento antes de comercializar.
+
+## Acesso direto de corretores, sem tokens de convite
+
+Os proprietários das imobiliárias e o Super Admin agora utilizam **CRM → Equipe → Autorizar corretor**. Preenchem nome e e-mail e executam `crm_authorize_broker`, que valida empresa, proprietário e limite de assentos no banco.
+
+- Se o e-mail já corresponder a conta confirmada, a vinculação de corretor fica ativa imediatamente, sem necessidade de gerar convite;
+- Se ainda não existir conta confirmada, a autorização fica **pendente**, reservando um dos acessos do plano. O corretor usa `/acesso-corretor?empresa=<slug>` para cadastrar senha ou entrar com conta existente, confirma o e-mail e aciona `crm_activate_authorized_broker`;
+- O link é permanente e compartilhável, mas **não concede acesso sozinho**. O servidor verifica se o e-mail foi autorizado pelo proprietário;
+- A listagem exibe corretores ativos, autorizados e revogados. Revogações também desativam o vínculo no CRM;
+- Permissões são por imobiliária, o corretor não vê leads de outra empresa ou não atribuídos a ele;
+- O SQL migra em `0016_direct_broker_authorization.sql` e `0017_broker_authorization_seat_fix.sql`. A antiga RPC de convites não fica mais executável por usuários normais. A rota legada `/convite` exibe orientação de migração.
+
+A confirmação de e-mail do provedor de autenticação continua obrigatória para novos acessos. Não compartilhe senhas entre profissionais.
+
+## Backup completo por imobiliária
+
+Os proprietários acessam **Painel → Backup**. No painel Master, **Meus clientes → Backup** seleciona a empresa e mostra sua página de exportação. A interface oferece opção **Diário**, **Semanal** e **Mensal** para organização de arquivos e respectivo nome.
+
+A exportação é sempre um **snapshot completo do momento do clique**. Não há rotina automática de download ou armazenamento em nuvem neste recurso. O download é um **ZIP** com:
+- `backup.json`: empresa e identidade visual, imóveis, fotos (metadados), leads, visitas, negócios, corretoras/corretores, plano e autorizações;
+- `midia/property-images/` e `midia/agency-branding/`: imagens armazenadas no CASAS relacionadas à empresa, quando o arquivo for encontrado;
+- `LEIA-ME.txt` com instruções de guarda e recuperação assistida;
+- Para Super Admin, dados de cobrança manual da empresa também são incluídos; o cliente comum não exporta dados privados de administração geral.
+
+Exportação roda no navegador do proprietário; RLS restringe os registros por empresa. O ZIP não inclui senhas, tokens nem credenciais do Supabase. Se alguma mídia obrigatória não puder ser copiada, **não há arquivo parcial**. O limite desta primeira versão é 220 MB por exportação para evitar travamento de memória; bases maiores exigem backup administrado fora do navegador. A importação não é automática.
+
+**Importante:** o arquivo contém dados pessoais (LGPD), deve ser armazenado privadamente e não enviado por WhatsApp para terceiros. Teste a recuperação por procedimento técnico antes de tratar o backup como garantia de restauração.
