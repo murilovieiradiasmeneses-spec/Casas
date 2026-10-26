@@ -372,7 +372,7 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
           <form onSubmit={addAgent} className="mt-4 space-y-3">
             <div><Label htmlFor="crm-agent-name">Nome do corretor</Label><Input id="crm-agent-name" value={agentName} onChange={e=>setAgentName(e.target.value)} required/></div>
             <div><Label htmlFor="crm-agent-email">E-mail de acesso já cadastrado</Label><Input id="crm-agent-email" type="email" value={agentEmail} onChange={e=>setAgentEmail(e.target.value)} required/></div>
-            <Button type="submit" disabled={busy||seats>=limit} block={false}><Plus/> Vincular corretor</Button>
+            <Button type="submit" disabled={busy||seats>=limit}><Plus/> Vincular corretor</Button>
           </form>
         </article>
       </div>

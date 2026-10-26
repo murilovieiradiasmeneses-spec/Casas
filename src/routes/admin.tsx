@@ -57,6 +57,7 @@ function AdminLayout() {
             <Link to="/admin/clientes" className="font-display text-xl font-bold tracking-[-0.055em] md:text-2xl">CASAS <span className="text-primary">/</span> Painel Master</Link>
             <Link to="/admin/novo" className="text-sm hover:underline">Cadastrar imóvel</Link>
             <Link to="/admin/marca" className="text-sm hover:underline">Identidade visual</Link>
+            <Link to="/admin/crm" className="text-sm hover:underline">CRM · Vendas</Link>
             {q.data.isPlatformAdmin && <Link to="/admin/clientes" className="text-sm hover:underline">Meus clientes</Link>}
             {q.data.isPlatformAdmin && <Link to="/admin/pagamentos" className="text-sm hover:underline">Pagamentos</Link>}
           </div>

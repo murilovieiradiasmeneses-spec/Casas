@@ -9,7 +9,7 @@ export const Route = createFileRoute("/painel")({
   component: PortalAccess,
 });
 
-async function resolveDestination(): Promise<"login" | "master" | "client" | "denied"> {
+async function resolveDestination(): Promise<"login" | "master" | "client" | "broker" | "denied"> {
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user) return "login";
   const { data: isMaster, error: roleError } = await supabase.rpc("has_role", {
@@ -20,7 +20,11 @@ async function resolveDestination(): Promise<"login" | "master" | "client" | "de
   const { data: memberships, error: memberError } = await supabase.from("agency_members")
     .select("agency_id").eq("user_id", data.user.id).limit(1);
   if (memberError) throw memberError;
-  return memberships?.length ? "client" : "denied";
+  if (memberships?.length) return "client";
+  const { data: broker, error: brokerError } = await supabase.from("crm_salespeople")
+    .select("id").eq("user_id",data.user.id).eq("active",true).limit(1);
+  if (brokerError) throw brokerError;
+  return broker?.length ? "broker" : "denied";
 }
 function PortalAccess() {
   const q = useQuery({ queryKey: ["portal-role"], queryFn: resolveDestination, staleTime: 0 });
@@ -32,6 +36,7 @@ function PortalAccess() {
   if (q.data === "login") return <Navigate to="/entrar" replace />;
   if (q.data === "master") return <Navigate to="/admin" replace />;
   if (q.data === "client") return <Navigate to="/cliente" replace />;
+  if (q.data === "broker") return <Navigate to="/corretor" replace />;
   return <div className="mx-auto max-w-xl p-16 text-center">
     <h1 className="text-3xl">Acesso não vinculado</h1>
     <p className="mt-3 text-muted-foreground">Peça ao administrador da plataforma para vincular este e-mail à sua empresa.</p>

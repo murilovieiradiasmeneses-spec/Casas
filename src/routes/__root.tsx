@@ -123,7 +123,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isWhiteLabel = pathname.startsWith("/v/") || pathname.startsWith("/cliente");
+  const isWhiteLabel = pathname.startsWith("/v/") || pathname.startsWith("/cliente") || pathname.startsWith("/corretor");
 
   return (
     <QueryClientProvider client={queryClient}>
