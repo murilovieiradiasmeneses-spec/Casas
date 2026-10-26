@@ -80,7 +80,7 @@ export async function signPaths(paths: (string | null | undefined)[]) {
     try {
       const { signPublicPhotos } = await import("@/lib/photos.functions");
       const res = await signPublicPhotos({ data: { paths: missing } });
-      res.forEach((r) => map.set(r.path, r.url));
+      res.forEach((r) => map.set(String(r.path), String(r.url)));
     } catch { /* leave unsigned */ }
   }
   return map;
@@ -135,7 +135,7 @@ export async function fetchPublished(f: Filters = {}, opts: { featuredOnly?: boo
   const { data, error } = await q;
   if (error) throw error;
   const urls = await signPaths(data.map((p) => p.cover_image_url));
-  return data.map((p) => ({ ...p, coverUrl: p.cover_image_url ? urls.get(p.cover_image_url) ?? null : null }));
+  return (data as unknown as Property[]).map((p): PropertyWithCover => ({ ...p, coverUrl: p.cover_image_url ? urls.get(p.cover_image_url) ?? null : null }));
 }
 
 export async function fetchBySlug(slug: string, agencyId?: string) {
@@ -145,8 +145,8 @@ export async function fetchBySlug(slug: string, agencyId?: string) {
   if (error) throw error;
   if (!data) return null;
   const [img,publicAgency] = await Promise.all([
-    supabase.from("property_images").select("id,url,position").eq("property_id", data.id).order("position"),
-    supabase.from("public_agency_profiles").select("name,whatsapp").eq("id", data.agency_id).maybeSingle(),
+    supabase.from("property_images").select("id,url,position").eq("property_id", data.id as string).order("position"),
+    supabase.from("public_agency_profiles").select("name,whatsapp").eq("id", data.agency_id as string).maybeSingle(),
   ]);
   if (img.error) throw img.error;
   if (publicAgency.error) throw publicAgency.error;

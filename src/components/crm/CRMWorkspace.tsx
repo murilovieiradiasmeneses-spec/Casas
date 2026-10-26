@@ -89,7 +89,7 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
         seats=g.data??0;
       }
       return {leads:a.data??[],visits:b.data??[],deals:c.data??[],
-        team:d.data??[],properties:e.data??[],settings,seats};
+        team:d.data??[],properties:(e.data??[]).filter((x):x is PropertyOption=>!!x.id&&!!x.title),settings,seats};
     },
     refetchInterval:45000,
     staleTime:10000,
