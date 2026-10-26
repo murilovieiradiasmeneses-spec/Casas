@@ -1,6 +1,6 @@
 import type { Deal, Lead, Visit } from "@/lib/crm";
 
-export type CRMAlertKind = "birthday" | "followup" | "negotiation" | "visit";
+export type CRMAlertKind = "birthday" | "followup" | "negotiation" | "visit" | "received";
 export type CRMAlertUrgency = "overdue" | "today" | "upcoming";
 
 export interface CRMAlert {
@@ -59,11 +59,21 @@ export function getCRMAlerts(
   { leads, visits, deals }: { leads: Lead[]; visits: Visit[]; deals: Deal[] },
   now: Date = new Date(),
   daysAhead = 7,
+  includeAssignedNew = false,
 ): CRMAlert[] {
   const alerts: CRMAlert[] = [];
   const leadNames = new Map(leads.map(l => [l.id, l.name]));
 
   for (const lead of leads) {
+    if (includeAssignedNew && lead.stage === "novo" && lead.assigned_agent_id) {
+      alerts.push({
+        id: "received:" + lead.id, entityId: lead.id, leadId: lead.id,
+        kind: "received", urgency: "today", target: "leads",
+        title: "Lead recebido: " + lead.name,
+        description: "A imobiliária encaminhou este contato para você. Abra os dados e inicie o atendimento.",
+        daysUntil: 0, dueLabel: "Novo lead",
+      });
+    }
     if (lead.stage !== "ganho" && lead.stage !== "perdido" && lead.next_contact_at) {
       const when = new Date(lead.next_contact_at);
       if (!Number.isNaN(when.getTime())) {
