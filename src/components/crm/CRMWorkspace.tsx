@@ -62,6 +62,7 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
   const [dealDraft,setDealDraft]=useState<Partial<Deal>|null>(null);
   const [agentName,setAgentName]=useState("");
   const [agentEmail,setAgentEmail]=useState("");
+  const [inviteLink,setInviteLink]=useState("");
   const q=useQuery({
     queryKey:["casas-crm",agencyId,isBroker,brokerId],
     enabled:!!agencyId && (!isBroker||!!brokerId),
@@ -183,10 +184,20 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
   const addAgent=async(e:React.FormEvent)=>{
     e.preventDefault();
     if(!agentEmail.includes("@")||agentName.trim().length<2)return toast.error("Informe nome e e-mail válidos.");
-    const ok=await run(()=>supabase.rpc("crm_assign_salesperson",{
-      _agency:agencyId,_email:agentEmail.trim(),_name:agentName.trim(),
-    }),"Corretor vinculado à imobiliária.");
-    if(ok){setAgentName("");setAgentEmail("");}
+    setBusy(true);
+    setInviteLink("");
+    try {
+      const {data,error}=await supabase.rpc("crm_create_broker_invite",{
+        _agency:agencyId,_email:agentEmail.trim(),_name:agentName.trim(),
+      });
+      if(error)throw error;
+      const link=window.location.origin+"/convite?codigo="+encodeURIComponent(data);
+      setInviteLink(link);
+      setAgentName("");setAgentEmail("");
+      try{await navigator.clipboard.writeText(link);toast.success("Convite gerado e copiado. Envie ao corretor.");}
+      catch{toast.success("Convite criado. Copie o link abaixo e envie ao corretor.");}
+    }catch(error){toast.error((error as Error).message);}
+    finally{setBusy(false);}
   };
   const changePlan=async(next:string)=>{
     if(!isMaster)return;
@@ -392,13 +403,28 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
           </div>:<p className="mt-4 text-xs text-muted-foreground">Para aumentar seu limite, solicite a evolução do plano ao administrador do CASAS pelo WhatsApp.</p>}
         </article>
         <article className={panel}>
-          <div className="flex items-center gap-3"><UserPlus className="h-5 w-5 text-primary"/><h4 className="text-lg">Adicionar corretor</h4></div>
-          <p className="mt-3 text-xs text-muted-foreground">Crie primeiro o usuário em Cloud → Users do CASAS. Depois vincule pelo e-mail aqui. Não compartilhe sua senha.</p>
+          <div className="flex items-center gap-3"><UserPlus className="h-5 w-5 text-primary"/><h4 className="text-lg">Convidar corretor</h4></div>
+          <p className="mt-3 text-xs text-muted-foreground">Informe nome e e-mail, gere um convite e envie pelo WhatsApp. O corretor criará sua própria senha sem precisar de cadastro no Cloud. Convites duram 7 dias e respeitam o plano.</p>
           <form onSubmit={addAgent} className="mt-4 space-y-3">
             <div><Label htmlFor="crm-agent-name">Nome do corretor</Label><Input id="crm-agent-name" value={agentName} onChange={e=>setAgentName(e.target.value)} required/></div>
-            <div><Label htmlFor="crm-agent-email">E-mail de acesso já cadastrado</Label><Input id="crm-agent-email" type="email" value={agentEmail} onChange={e=>setAgentEmail(e.target.value)} required/></div>
-            <Button type="submit" disabled={busy||seats>=limit}><Plus/> Vincular corretor</Button>
+            <div><Label htmlFor="crm-agent-email">E-mail que receberá o convite</Label><Input id="crm-agent-email" type="email" value={agentEmail} onChange={e=>setAgentEmail(e.target.value)} required/></div>
+            <Button type="submit" disabled={busy||seats>=limit}><Plus/> {busy?"Gerando...":"Gerar convite de acesso"}</Button>
           </form>
+          {inviteLink&&<div className="mt-4 rounded-xl border border-primary/30 bg-secondary/50 p-4">
+            <p className="text-sm font-semibold">Link do convite criado!</p>
+            <p className="mt-1 text-xs text-muted-foreground">Envie apenas ao corretor convidado. O link expira em 7 dias e é válido para um único acesso.</p>
+            <p className="mt-2 break-all rounded-lg bg-card p-3 text-xs">{inviteLink}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button size="sm" type="button" onClick={async()=>{
+                try{await navigator.clipboard.writeText(inviteLink);toast.success("Link copiado.");}
+                catch{toast.info("Selecione e copie o link exibido.");}
+              }}>Copiar convite</Button>
+              <Button size="sm" variant="outline" asChild>
+                <a href={"https://wa.me/?text="+encodeURIComponent("Olá! Segue seu convite para acessar o CRM CASAS como corretor: "+inviteLink)}
+                  target="_blank" rel="noopener noreferrer">Enviar pelo WhatsApp</a>
+              </Button>
+            </div>
+          </div>
         </article>
       </div>
       <article className={panel}>
