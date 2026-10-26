@@ -272,9 +272,16 @@ export function CRMWorkspace({agencyId,agencyName,isMaster=false,isBroker=false,
           <p className="mt-1 text-xs text-muted-foreground">Volume de propostas e negociações — não garantido</p>
         </article>
         <article className={panel}><div className="flex items-center gap-3"><UserRound className="h-5 w-5 text-primary"/><h3 className="text-lg">Desempenho da equipe</h3></div>
-          <div className="mt-4 space-y-2">{bestAgents.slice(0,3).map(s=><div key={s.name} className="flex justify-between gap-2 text-sm"><span>{s.name}</span><strong>{crmBRL(s.total)}</strong></div>)}
-            {!bestAgents.length && <p className="text-sm text-muted-foreground">Cadastre corretores para acompanhar resultados.</p>}
-          </div>
+          {bestAgents.length ? <div className="mt-4 h-44 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart layout="vertical" data={bestAgents.slice(0,5)} margin={{left:0,right:12}}>
+                <XAxis type="number" tickFormatter={v=>v>=1000?(v/1000)+"k":String(v)} fontSize={10} axisLine={false} tickLine={false}/>
+                <YAxis type="category" dataKey="name" width={85} tick={{fontSize:10}} axisLine={false} tickLine={false}/>
+                <Tooltip formatter={v=>crmBRL(Number(v))}/>
+                <Bar dataKey="total" name="Vendas" fill="var(--primary)" radius={[0,6,6,0]}/>
+              </BarChart>
+            </ResponsiveContainer>
+          </div> : <p className="mt-4 text-sm text-muted-foreground">Cadastre corretores para acompanhar resultados.</p>}
         </article>
       </div>
       <p className="text-xs text-muted-foreground">Os gráficos são gerados a partir dos registros do CRM; valores de negócios ganhos são declarados manualmente e não representam confirmação bancária de recebimento.</p>

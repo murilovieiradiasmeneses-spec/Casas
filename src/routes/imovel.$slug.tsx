@@ -1,3 +1,4 @@
+import { InterestForm } from "@/components/crm/InterestForm";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ClientOnly } from "@tanstack/react-router";
@@ -106,6 +107,7 @@ function PropertyPage() {
               <p className="mt-6 text-sm text-muted-foreground">Contato indisponível no momento.</p>
             )}
             {agency && <p className="mt-4 text-center text-xs text-muted-foreground">Anunciado por {agency.name}</p>}
+            <InterestForm propertyId={p.id} agencyName={agency?.name??"a imobiliária responsável"}/>
           </div>
         </aside>
       </div>

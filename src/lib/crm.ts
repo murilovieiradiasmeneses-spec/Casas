@@ -66,7 +66,7 @@ export function crmMetrics(leads:Lead[],deals:Deal[],visits:Visit[],now = new Da
   return {
     leads:leads.length,
     won:won.length,
-    conversion:leads.length?Math.round((won.length/leads.length)*100):0,
+    conversion:leads.length?Math.round((new Set(won.map(d=>d.lead_id)).size/leads.length)*100):0,
     revenue:won.reduce((sum,d)=>sum+Number(d.amount_brl),0),
     revenueMonth:won.filter(d=>d.closed_at&&new Date(d.closed_at).getTime()>=start)
       .reduce((sum,d)=>sum+Number(d.amount_brl),0),

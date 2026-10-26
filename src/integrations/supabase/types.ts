@@ -20,6 +20,7 @@ export type Database = {
           agency_id: string
           property_id: string | null
           assigned_agent_id: string | null
+          consent_at: string | null
           name: string
           phone: string
           email: string | null
@@ -36,6 +37,7 @@ export type Database = {
           agency_id: string
           property_id?: string | null
           assigned_agent_id?: string | null
+          consent_at?: string | null
           name: string
           phone?: string
           email?: string | null
@@ -52,6 +54,7 @@ export type Database = {
           agency_id?: string
           property_id?: string | null
           assigned_agent_id?: string | null
+          consent_at?: string | null
           name?: string
           phone?: string
           email?: string | null
@@ -498,6 +501,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      crm_capture_interest: { Args: { _property_id: string; _name: string; _phone: string; _email?: string | null }; Returns: boolean }
       crm_assign_salesperson: { Args: { _agency: string; _email: string; _name: string }; Returns: string }
       crm_toggle_salesperson: { Args: { _agent: string; _active: boolean }; Returns: undefined }
       crm_is_agent: { Args: { _agency: string }; Returns: boolean }

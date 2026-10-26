@@ -44,3 +44,9 @@ Tabelas privadas `crm_leads`, `crm_visits`, `crm_deals` e `crm_salespeople` usam
 - Convite de usuário com e-mail transacional seguro por função de backend com credenciais protegidas.
 - Relatórios avançados de comissões, metas e exportação.
 - Integração com calendário e WhatsApp Business API, se desejado.
+
+## Captação automática de leads por imóvel
+
+As páginas públicas de imóveis possuem um formulário **Solicitar contato**, que pede nome, WhatsApp, e-mail opcional e consentimento explícito. O envio usa RPC `crm_capture_interest`; nenhuma tabela privada é aberta ao público. O lead criado tem `source='site'`, vinculação ao imóvel e entra na coluna Novo lead, sem corretor atribuído. Um gerente pode encaminhar o lead a um corretor.
+
+Proteção inicial: validação do imóvel publicado, campos e antiduplicidade para mesmo telefone e imóvel por uma hora, mais campo antirrobô. Para produção de grande escala, incluir CAPTCHA/limite por IP em backend, política de privacidade e fluxo de exclusão de dados conforme LGPD. Migração: `0010_crm_public_interest.sql`.
