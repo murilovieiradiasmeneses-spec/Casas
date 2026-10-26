@@ -6,7 +6,7 @@ import {
 } from "recharts";
 import {
   ArrowUpRight, CalendarDays, ChartNoAxesCombined, CircleDollarSign,
-  Handshake, KanbanSquare, MessageCircle, Plus, Users,
+  Handshake, Columns3, MessageCircle, Plus, Users,
   UserRound, TrendingUp, Search, ClipboardCheck, UserPlus, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -37,7 +37,7 @@ type Props = {
 };
 const tabs: { key:CRMTab;label:string;icon:typeof Users }[] = [
   {key:"visao",label:"Visão geral",icon:ChartNoAxesCombined},
-  {key:"leads",label:"Funil de leads",icon:KanbanSquare},
+  {key:"leads",label:"Funil de leads",icon:Columns3},
   {key:"visitas",label:"Visitas",icon:CalendarDays},
   {key:"negociacoes",label:"Negociações",icon:Handshake},
   {key:"equipe",label:"Equipe",icon:Users},
