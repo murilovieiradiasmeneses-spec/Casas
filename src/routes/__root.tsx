@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
@@ -121,15 +122,17 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isWhiteLabel = pathname.startsWith("/v/");
 
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <SiteHeader />
+      {!isWhiteLabel && <SiteHeader />}
       <main className="min-h-[70vh]">
         <Outlet />
       </main>
-      <SiteFooter />
+      {!isWhiteLabel && <SiteFooter />}
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );

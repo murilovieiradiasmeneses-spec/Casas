@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Pencil, Trash2, Eye, EyeOff, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAgency } from "@/contexts/AdminAgencyContext";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/PropertyCard";
 import {
@@ -15,10 +16,11 @@ export const Route = createFileRoute("/admin/")({ component: Dashboard });
 
 function Dashboard() {
   const qc = useQueryClient();
+  const { activeAgencyId } = useAdminAgency();
   const q = useQuery({
-    queryKey: ["admin-properties"],
+    queryKey: ["admin-properties", activeAgencyId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("properties").select("*").order("updated_at", { ascending: false });
+      const { data, error } = await supabase.from("properties").select("*").eq("agency_id", activeAgencyId).order("updated_at", { ascending: false });
       if (error) throw error;
       return data as Property[];
     },
@@ -26,10 +28,10 @@ function Dashboard() {
 
   const update = useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<Property> }) => {
-      const { error } = await supabase.from("properties").update(patch).eq("id", id);
+      const { error } = await supabase.from("properties").update(patch).eq("id", id).eq("agency_id", activeAgencyId);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties", activeAgencyId] }),
     onError: () => toast.error("Não foi possível salvar."),
   });
 
@@ -38,12 +40,12 @@ function Dashboard() {
       const { data: imgs } = await supabase.from("property_images").select("storage_path").eq("property_id", id);
       const paths = (imgs ?? []).map((i) => i.storage_path).filter((p): p is string => !!p);
       if (paths.length) await supabase.storage.from(BUCKET).remove(paths);
-      const { error } = await supabase.from("properties").delete().eq("id", id);
+      const { error } = await supabase.from("properties").delete().eq("id", id).eq("agency_id", activeAgencyId);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Imóvel excluído.");
-      qc.invalidateQueries({ queryKey: ["admin-properties"] });
+      qc.invalidateQueries({ queryKey: ["admin-properties", activeAgencyId] });
     },
     onError: () => toast.error("Não foi possível excluir."),
   });

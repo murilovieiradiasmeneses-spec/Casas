@@ -29,7 +29,7 @@ export function ImageManager({ property, onChange }: { property: Property; onCha
     for (const file of Array.from(files)) {
       if (!file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) { failed++; continue; }
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${property.id}/${crypto.randomUUID()}.${ext}`;
+      const path = `${property.agency_id}/${property.id}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type });
       if (error) { failed++; continue; }
       const { error: e2 } = await supabase.from("property_images").insert({ property_id: property.id, url: path, storage_path: path, position: pos++ });

@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 export type Property = Tables<"properties">;
+export type Agency = Tables<"agencies">;
 export type PropertyImage = Tables<"property_images">;
 export type PropertyWithCover = Property & { coverUrl: string | null };
 
@@ -80,8 +81,9 @@ export function parseFilters(search: Record<string, unknown>): Filters {
   };
 }
 
-export async function fetchPublished(f: Filters = {}, opts: { featuredOnly?: boolean; limit?: number } = {}) {
+export async function fetchPublished(f: Filters = {}, opts: { featuredOnly?: boolean; limit?: number; agencyId?: string } = {}) {
   let q = supabase.from("properties").select("*").eq("published", true);
+  if (opts.agencyId) q = q.eq("agency_id", opts.agencyId);
   if (f.q) {
     const term = f.q.replace(/[%,()]/g, " ");
     q = q.or(`city.ilike.%${term}%,neighborhood.ilike.%${term}%`);
@@ -100,12 +102,13 @@ export async function fetchPublished(f: Filters = {}, opts: { featuredOnly?: boo
   return data.map((p) => ({ ...p, coverUrl: p.cover_image_url ? urls.get(p.cover_image_url) ?? null : null }));
 }
 
-export async function fetchBySlug(slug: string) {
-  const { data, error } = await supabase
+export async function fetchBySlug(slug: string, agencyId?: string) {
+  let query = supabase
     .from("properties")
     .select("*, property_images(*), agencies(name, whatsapp)")
-    .eq("slug", slug)
-    .maybeSingle();
+    .eq("slug", slug).eq("published", true);
+  if (agencyId) query = query.eq("agency_id", agencyId);
+  const { data, error } = await query.maybeSingle();
   if (error) throw error;
   if (!data) return null;
   const images = [...(data.property_images ?? [])].sort((a, b) => a.position - b.position);

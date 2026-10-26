@@ -7,15 +7,16 @@ export function PropertyCard({
   p,
   active,
   onHover,
+  agencySlug,
 }: {
   p: PropertyWithCover;
   active?: boolean;
   onHover?: (id: string | null) => void;
+  agencySlug?: string;
 }) {
   return (
-    <Link
-      to="/imovel/$slug"
-      params={{ slug: p.slug }}
+    <a
+      href={agencySlug ? "/v/" + encodeURIComponent(agencySlug) + "/imovel/" + encodeURIComponent(p.slug) : "/imovel/" + encodeURIComponent(p.slug)}
       id={`card-${p.id}`}
       onMouseEnter={() => onHover?.(p.id)}
       onMouseLeave={() => onHover?.(null)}
@@ -47,7 +48,7 @@ export function PropertyCard({
           {(p.built_area || p.land_area) && <span className="flex items-center gap-1"><Maximize className="h-3.5 w-3.5" />{Number(p.built_area || p.land_area)} m²</span>}
         </div>
       </div>
-    </Link>
+    </a>
   );
 }
 

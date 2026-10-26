@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAgency } from "@/contexts/AdminAgencyContext";
 import { PropertyForm } from "@/components/admin/PropertyForm";
 import { ImageManager } from "@/components/admin/ImageManager";
 import { EmptyState } from "@/components/PropertyCard";
@@ -10,10 +11,11 @@ export const Route = createFileRoute("/admin/$id")({ component: EditProperty });
 
 function EditProperty() {
   const { id } = Route.useParams();
+  const { activeAgencyId } = useAdminAgency();
   const q = useQuery({
-    queryKey: ["admin-property", id],
+    queryKey: ["admin-property", activeAgencyId, id],
     queryFn: async () => {
-      const { data, error } = await supabase.from("properties").select("*").eq("id", id).maybeSingle();
+      const { data, error } = await supabase.from("properties").select("*").eq("id", id).eq("agency_id", activeAgencyId).maybeSingle();
       if (error) throw error;
       return data;
     },

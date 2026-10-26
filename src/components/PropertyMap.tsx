@@ -25,8 +25,10 @@ export function PropertyMap({
   selectedId,
   onSelect,
   className,
+  agencySlug,
 }: {
   items: PropertyWithCover[];
+  agencySlug?: string;
   selectedId?: string | null;
   onSelect?: (id: string) => void;
   className?: string;
@@ -56,7 +58,7 @@ export function PropertyMap({
         const icon = L.divIcon({ className: "", html: `<span class="casas-pin">${shortPrice(Number(p.price))}</span>`, iconSize: [0, 0] });
         const m = L.marker([p.latitude, p.longitude], { icon }).addTo(map.current!);
         m.bindPopup(
-          `<div class="casas-pop">${p.coverUrl ? `<img src="${esc(p.coverUrl)}" alt="">` : ""}<div class="b"><div class="p">${esc(formatPrice(p.price, p.purpose))}</div><div class="n">${esc(p.neighborhood)}, ${esc(p.city)}</div><a href="/imovel/${esc(p.slug)}">Ver imóvel</a></div></div>`,
+          `<div class="casas-pop">${p.coverUrl ? `<img src="${esc(p.coverUrl)}" alt="">` : ""}<div class="b"><div class="p">${esc(formatPrice(p.price, p.purpose))}</div><div class="n">${esc(p.neighborhood)}, ${esc(p.city)}</div><a href="${agencySlug ? "/v/" + esc(agencySlug) : ""}/imovel/${esc(p.slug)}">Ver imóvel</a></div></div>`,
         );
         m.on("click", () => onSelectRef.current?.(p.id));
         markers.current.set(p.id, m);
@@ -69,7 +71,7 @@ export function PropertyMap({
     return () => {
       cancelled = true;
     };
-  }, [items]);
+  }, [items, agencySlug]);
 
   useEffect(() => {
     markers.current.forEach((m, id) => {

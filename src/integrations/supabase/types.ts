@@ -16,30 +16,75 @@ export type Database = {
     Tables: {
       agencies: {
         Row: {
-          created_at: string
-          email: string | null
           id: string
           name: string
           slug: string
           whatsapp: string | null
+          email: string | null
+          created_at: string
+          logo_url: string | null
+          hero_url: string | null
+          tagline: string
+          about: string
+          address: string | null
+          instagram: string | null
+          primary_color: string
+          secondary_color: string
+          background_color: string
+          active: boolean
+          custom_domain: string | null
         }
         Insert: {
-          created_at?: string
-          email?: string | null
           id?: string
           name: string
           slug: string
           whatsapp?: string | null
+          email?: string | null
+          created_at?: string
+          logo_url?: string | null
+          hero_url?: string | null
+          tagline?: string
+          about?: string
+          address?: string | null
+          instagram?: string | null
+          primary_color?: string
+          secondary_color?: string
+          background_color?: string
+          active?: boolean
+          custom_domain?: string | null
         }
         Update: {
-          created_at?: string
-          email?: string | null
           id?: string
           name?: string
           slug?: string
           whatsapp?: string | null
+          email?: string | null
+          created_at?: string
+          logo_url?: string | null
+          hero_url?: string | null
+          tagline?: string
+          about?: string
+          address?: string | null
+          instagram?: string | null
+          primary_color?: string
+          secondary_color?: string
+          background_color?: string
+          active?: boolean
+          custom_domain?: string | null
         }
         Relationships: []
+      }
+      agency_members: {
+        Row: { agency_id: string; user_id: string; role: string; created_at: string }
+        Insert: { agency_id: string; user_id: string; role: string; created_at?: string }
+        Update: { agency_id?: string; user_id?: string; role?: string; created_at?: string }
+        Relationships: [{
+          foreignKeyName: "agency_members_agency_id_fkey"
+          columns: ["agency_id"]
+          isOneToOne: false
+          referencedRelation: "agencies"
+          referencedColumns: ["id"]
+        }]
       }
       properties: {
         Row: {
@@ -206,6 +251,9 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_agency: { Args: { _agency_id: string }; Returns: boolean }
+      can_edit_brand: { Args: { _agency_id: string }; Returns: boolean }
+      assign_agency_member: { Args: { _agency_id: string; _email: string; _role: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

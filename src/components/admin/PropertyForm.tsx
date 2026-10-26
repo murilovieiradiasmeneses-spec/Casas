@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ClientOnly } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAgency } from "@/contexts/AdminAgencyContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +48,7 @@ const sel = "h-9 w-full rounded-md border border-input bg-card px-3 text-sm";
 
 export function PropertyForm({ initial }: { initial?: Property }) {
   const navigate = useNavigate();
+  const { activeAgencyId } = useAdminAgency();
   const qc = useQueryClient();
   const [v, setV] = useState<Values>(() => toValues(initial));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -85,19 +87,17 @@ export function PropertyForm({ initial }: { initial?: Property }) {
     setSaving(true);
     try {
       if (initial) {
-        const { error } = await supabase.from("properties").update(parsed.data).eq("id", initial.id);
+        const { error } = await supabase.from("properties").update(parsed.data).eq("id", initial.id).eq("agency_id", activeAgencyId);
         if (error) throw error;
         toast.success("Alterações salvas.");
-        qc.invalidateQueries({ queryKey: ["admin-property", initial.id] });
+        qc.invalidateQueries({ queryKey: ["admin-property", activeAgencyId, initial.id] });
       } else {
-        const { data: agency, error: aErr } = await supabase.from("agencies").select("id").eq("slug", "casas").single();
-        if (aErr) throw aErr;
-        const { data, error } = await supabase.from("properties").insert({ ...parsed.data, agency_id: agency.id }).select("id").single();
+        const { data, error } = await supabase.from("properties").insert({ ...parsed.data, agency_id: activeAgencyId }).select("id").single();
         if (error) throw error;
         toast.success("Imóvel criado. Agora envie as fotos.");
         navigate({ to: "/admin/$id", params: { id: data.id } });
       }
-      qc.invalidateQueries({ queryKey: ["admin-properties"] });
+      qc.invalidateQueries({ queryKey: ["admin-properties", activeAgencyId] });
     } catch (err) {
       const msg = (err as { code?: string; message?: string }).code === "23505" ? "Já existe um imóvel com esse endereço de página (slug)." : "Não foi possível salvar. Verifique sua permissão de administrador.";
       toast.error(msg);
