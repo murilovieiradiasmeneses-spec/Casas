@@ -1,5 +1,5 @@
 import { BedDouble, Bath, Car, Maximize, ImageOff, ArrowUpRight, MapPin } from "lucide-react";
-import { formatPrice, PURPOSE_LABEL, STATUS_LABEL, TYPE_LABEL, type PropertyWithCover } from "@/lib/properties";
+import { formatPrice, PURPOSE_LABEL, STATUS_LABEL, type PropertyWithCover } from "@/lib/properties";
 import { cn } from "@/lib/utils";
 
 export function PropertyCard({
