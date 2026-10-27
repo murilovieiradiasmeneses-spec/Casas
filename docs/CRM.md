@@ -150,8 +150,14 @@ As sessões de autenticação do CASAS são armazenadas em `sessionStorage` **po
 
 ## Exclusão de leads pelo gestor
 
-Na aba **Funil de leads**, cada card tem a opção **Excluir**, e o formulário de **Editar lead** também tem **Excluir este lead**. A opção aparece apenas para gestor/master, nunca no painel do corretor. A política de DELETE no PostgreSQL `crm_leads` reforça `crm_is_manager(agency_id)` e, portanto, o corretor não pode contornar a restrição pela API.
+Na aba **Funil de leads**, cada card tem a opção **Excluir**, e o formulário de **Editar lead** também tem **Excluir este lead**. A opção aparece apenas para o proprietário da imobiliária ou administrador master, nunca para editor ou corretor. A política de DELETE no PostgreSQL `crm_leads` reforça `crm_is_owner(agency_id)` e, portanto, o corretor não pode contornar a restrição pela API.
 
 A exclusão tem duas etapas: abrir o diálogo de confirmação (com nome/empresa do lead e contagem de visitas, negociações e vendas ganhas) e digitar `EXCLUIR`. O comando envia `DELETE` filtrado por **id do lead e agency_id**, espera o banco retornar exatamente um registro eliminado e só então atualiza o CRM. Se a permissão falhar ou o registro já não existir, o sistema mostra erro e não anuncia sucesso.
 
 **Exclusão definitiva:** as FKs `crm_visits.lead_id` e `crm_deals.lead_id` estão configuradas com `ON DELETE CASCADE`. Excluir o lead apaga permanentemente essas visitas e negociações, incluindo vendas concluídas: gráficos de faturamento, conversão e histórico comercial são recalculados. Imóveis e outros leads permanecem intactos. O usuário deve guardar um backup antes de excluir dados importantes. Não existe lixeira/recuperação automática nesta versão.
+
+## Botão de exclusão no site (proprietário e master)
+
+Em **CRM → Funil de leads**, no cabeçalho à direita do botão **Cadastrar**, há um botão **Excluir lead**. O responsável escolhe o contato numa lista, revisa a contagem de visitas/negociações/vendas vinculadas e digita `EXCLUIR` para confirmar. O mesmo comando fica nos cards e na edição de cada lead. As três entradas da interface verificam `canManageTeam` (RPC `crm_is_owner`), incluindo o master e o proprietário, não editores e nem corretores.
+
+No banco a migration `drizzle/migrations/0023_owner_master_delete_leads.sql` substitui a antiga política de gestor por `crm_is_owner(agency_id)` para que a regra não dependa apenas do botão visual. SQL já aplicado. A exclusão é irreversível no CRM; visitas e negociações são excluídas via cascata. Faça backup antes de excluir histórico importante.
