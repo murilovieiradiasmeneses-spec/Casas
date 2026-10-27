@@ -161,3 +161,13 @@ A exclusão tem duas etapas: abrir o diálogo de confirmação (com nome/empresa
 Em **CRM → Funil de leads**, no cabeçalho à direita do botão **Cadastrar**, há um botão **Excluir lead**. O responsável escolhe o contato numa lista, revisa a contagem de visitas/negociações/vendas vinculadas e digita `EXCLUIR` para confirmar. O mesmo comando fica nos cards e na edição de cada lead. As três entradas da interface verificam `canManageTeam` (RPC `crm_is_owner`), incluindo o master e o proprietário, não editores e nem corretores.
 
 No banco a migration `drizzle/migrations/0023_owner_master_delete_leads.sql` substitui a antiga política de gestor por `crm_is_owner(agency_id)` para que a regra não dependa apenas do botão visual. SQL já aplicado. A exclusão é irreversível no CRM; visitas e negociações são excluídas via cascata. Faça backup antes de excluir histórico importante.
+
+## Edição de valores e exclusão de negociações
+
+Em **CRM → Negociações e vendas**, cada registro mostra os botões **Editar valor** e, para proprietário ou master, **Excluir**.
+
+- **Editar valor** abre o cadastro existente, com o valor, etapa, título, lead, imóvel, prazo e observações preenchidos. Salvar usa UPDATE filtrado por `id` e `agency_id`; nunca cria outra negociação. A autorização segue a política de UPDATE do banco: gestores ou o corretor ao qual pertence o lead. Se a negociação já estava concluída, a data original do fechamento é preservada quando se edita apenas o valor.
+- **Excluir** exibe título e valor, alerta sobre o impacto financeiro e exige digitar `EXCLUIR`. O DELETE é limitado pelo banco ao proprietário da imobiliária e ao administrador master (`crm_is_owner`, migration `0024_owner_master_delete_deals.sql`). O lead e o imóvel não são excluídos, mas a negociação não pode ser restaurada pelo CRM.
+- Após qualquer mudança, a consulta da empresa é invalidada, e gráficos, previsões e faturamento refletem os dados mais recentes. O faturamento é apenas valor das negociações **ganhas**, não recebimento bancário.
+
+Testes: `src/test/crm-negotiations.test.ts` cobre preservação da data de fechamento, ajuste de valor e atualização dos indicadores, exclusão e distinção de previsão/faturamento.

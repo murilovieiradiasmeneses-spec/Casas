@@ -32,6 +32,11 @@ export const PLANS: { id: CRMSettings["plan"]; name: string; limit: number }[] =
   { id: "profissional", name: "Profissional", limit: 5 },
   { id: "premium", name: "Premium", limit: 10 },
 ];
+/** Preserve the original closing date when editing a completed sale. */
+export function negotiationCloseDate(status: DealStage, existing: string | null | undefined, now = new Date()):string|null {
+  return status==="ganho" ? (existing || now.toISOString()) : null;
+}
+
 export const crmBRL = (v: number | string | null | undefined) =>
   new Intl.NumberFormat("pt-BR", { style:"currency",currency:"BRL",maximumFractionDigits:0 }).format(Number(v || 0));
 export function crmPhone(phone?: string | null) {

@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  crmBRL, crmMetrics, revenueByMonth, leadDeletionImpact, LEAD_STAGES, DEAL_STAGES,
+  crmBRL, crmMetrics, revenueByMonth, leadDeletionImpact, negotiationCloseDate, LEAD_STAGES, DEAL_STAGES,
   VISIT_STATUSES, SOURCES, PLANS, crmPhone,
   type Lead, type Deal, type Visit, type Salesperson, type CRMSettings,
   type LeadStage, type DealStage,
@@ -190,7 +190,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
   );
   const updateVisit=(id:string,status:Visit["status"])=>run(async()=>supabase.from("crm_visits").update({status}).eq("id",id).eq("agency_id",agencyId),"Visita atualizada.");
   const updateDeal=(d:Deal,status:DealStage)=>run(async()=>supabase.from("crm_deals").update({
-    status,closed_at:status==="ganho"?(d.closed_at??new Date().toISOString()):null,
+    status,closed_at:negotiationCloseDate(status,d.closed_at),
   }).eq("id",d.id).eq("agency_id",agencyId),"Negociação atualizada.");
   const saveLead=async(e:React.FormEvent)=>{
     e.preventDefault();
@@ -238,7 +238,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
       property_id:dealDraft.property_id||null,title:dealDraft.title.trim(),
       amount_brl:amount,status:dealDraft.status??"proposta",
       expected_close_date:dealDraft.expected_close_date||null,
-      closed_at:dealDraft.status==="ganho"?(dealDraft.closed_at||new Date().toISOString()):null,
+      closed_at:negotiationCloseDate(dealDraft.status??"proposta",dealDraft.closed_at),
       notes:dealDraft.notes??""};
     const editing=!!dealDraft.id;
     const ok=await run(()=>(editing
