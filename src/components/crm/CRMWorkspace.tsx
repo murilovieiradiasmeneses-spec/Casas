@@ -139,8 +139,11 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
     ? window.location.origin+"/acesso-corretor?empresa="+encodeURIComponent(agencySlug)
     : "/acesso-corretor?empresa="+encodeURIComponent(agencySlug);
   const notifications=getCRMAlerts({leads,deals,visits},new Date(),7,isBroker);
-  const metrics=crmMetrics(leads,deals,visits);
-  const chartData=revenueByMonth(deals);
+  // A concluded rental deal is not a property sale. Rent cashflow is tracked
+  // separately in the new rental ledger to prevent inflating sales revenue.
+  const salesDeals=deals.filter(d=>properties.find(p=>p.id===d.property_id)?.purpose!=="locacao");
+  const metrics=crmMetrics(leads,salesDeals,visits);
+  const chartData=revenueByMonth(salesDeals);
   const plan=settings?.plan??"essencial",limit=settings?.max_users??3;
   const agentNameById=(id?:string|null)=>team.find(p=>p.id===id)?.name??"Sem corretor";
   const leadById=(id:string)=>leads.find(l=>l.id===id);
@@ -152,7 +155,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
   const bestAgents=team.map(agent=>({
     name:agent.name,
     leads:leads.filter(l=>l.assigned_agent_id===agent.id).length,
-    total:deals.filter(d=>d.status==="ganho" && leads.some(l=>l.id===d.lead_id && l.assigned_agent_id===agent.id))
+    total:salesDeals.filter(d=>d.status==="ganho" && leads.some(l=>l.id===d.lead_id && l.assigned_agent_id===agent.id))
       .reduce((acc,d)=>acc+Number(d.amount_brl),0),
   })).sort((a,b)=>b.total-a.total);
 
