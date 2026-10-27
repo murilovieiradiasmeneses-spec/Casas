@@ -192,3 +192,17 @@ O CRM do CASAS agora tem a aba **Locações**, visível ao proprietário, editor
 **Observações:** o CASAS não envia boletos, Pix ou lembretes automáticos, não recolhe pagamentos e não faz integração bancária nesta etapa. O dia de vencimento fica entre 1 e 28 para funcionar em todos os meses. Evite cadastrar dados pessoais de inquilinos além do necessário e trate os backups conforme a LGPD.
 
 Migrações: `0025_rental_crm.sql` e `0026_rental_integrity_guards.sql`. Testes unitários: `src/test/rentals.test.ts`. Antes da operação comercial, testar com uma imobiliária e um imóvel de locação, criar contrato, gerar parcelas, marcar recebido e conferir backup e relatórios; não há teste de ponta a ponta confirmado para esta entrega.
+
+## Cadastro de empresas e corretores com e-mail confirmado (onboarding)
+
+O cadastro de **novos clientes** agora permite autorizar e-mails diretamente no **Master → Meus clientes → Liberar acesso vendido**. Não é necessário pré-cadastrar usuários no Cloud. A função `master_authorize_agency_member` aceita:
+- conta existente e com e-mail confirmado: vincula imediatamente ao `agency_members`;
+- conta inexistente ou ainda não confirmada: registra autorização pendente de **14 dias**, não concede acesso antecipado. O master envia o link fixo `/acesso-cliente?empresa=<slug>`. O destinatário cria senha, recebe o e-mail de confirmação do **Auth** e depois ativa a empresa.
+
+**Corretores:** o proprietário libera o e-mail em **CRM → Equipe**. O corretor usa `/acesso-corretor?empresa=<slug>`, cria senha, confirma o e-mail e ativa seu vínculo. Não recebe acesso aos dados de outra imobiliária. A confirmação de endereço é verificada no servidor por `email_confirmed_at`. Ambos os formulários têm a ação **Reenviar e-mail de confirmação** via `supabase.auth.resend({type:"signup",...})`.
+
+**Antes de testar envio real:** em Lovable **More → Users → Settings → Email**, desligar **Auto-confirm email**. Confirmar configurações de Site URL, URLs de redirecionamento e do domínio publicado. Em **More → Emails**, configurar o domínio/remetente do CASAS e o template de confirmação; segundo a documentação do Lovable, seu serviço próprio de e-mails transacionais pode enviar mensagens da conta sem exigir serviço externo adicional. Esses ajustes de console não são feitos pelo GitHub e ainda precisam ser verificados por um responsável. Se o projeto for ligado a um Supabase externo em vez do Lovable Cloud, usar as configurações de Auth/SMTP daquele Supabase.
+
+**Escopo ainda não implementado:** e-mail de convite disparado automaticamente quando o master autoriza o primeiro cliente ou o proprietário autoriza o corretor. Hoje o proprietário/admin copia e encaminha o link fixo pelo WhatsApp; o envio da **confirmação** é disparado pelo provedor Auth quando o destinatário inicia o cadastro e cria a senha. Para convite imediato no momento da autorização, precisaremos integrar o serviço de e-mails com uma ação autenticada do backend e um modelo de convite, sem expor credenciais no navegador. Não afirmar que o e-mail foi enviado até o serviço confirmar a entrega.
+
+Migration: `0027_agency_self_registration.sql`. A confirmação deve ser validada com e-mails de teste reais antes do lançamento.
