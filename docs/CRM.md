@@ -136,3 +136,14 @@ Na página **Master → Meus clientes**, cada imobiliária agora oferece **Troca
 - Migração: `0020_broker_assigned_leads_only.sql`.
 
 Antes de disponibilizar comercialmente, testar em sessão real com duas imobiliárias, um proprietário e dois corretores, incluindo transferência de e-mail com conta nova e existente; simular que o corretor não consegue ver leads dos demais.
+
+## Correção: sessões não podem trocar de conta ao ativar corretores
+
+As sessões de autenticação do CASAS são armazenadas em `sessionStorage` **por aba**, em vez do armazenamento global da prévia do Lovable (que compartilhava o mesmo login entre superfícies), impedindo que o corretor aberto numa aba assuma involuntariamente a sessão do gestor em outra. O sistema limpa o cache de permissões, CRM e cadastros ao detectar uma mudança de usuário **na mesma aba**, redirecionando a área protegida para resolver as permissões novamente.
+
+- Cada aba pode ter uma conta diferente; fechar a aba encerra a persistência daquela sessão. Atualizar a aba preserva o login.
+- **Uma migração de sessão:** usuários já conectados com o armazenamento antigo podem precisar entrar novamente, uma única vez, após atualizar o CASAS.
+- No CRM da imobiliária há um link **Testar em outra aba** com `rel="noopener noreferrer"` para preservar a sessão do gestor. O cliente deve enviar o mesmo link ao corretor para que **ele** faça login em sua própria aba, navegador ou aparelho.
+- O link de ativação guarda o `slug` da imobiliária e, ao abrir `/corretor?empresa=<slug>`, prioriza **essa** carteira quando a mesma conta tiver vínculos em mais de uma imobiliária.
+- O banco continua sendo a fonte de verdade para autorizações; separar sessões não concede nenhuma permissão extra a usuários.
+- Teste com dois usuários em abas diferentes, inclusive na prévia do Lovable. O navegador pode bloquear cookies/armazenamento de terceiros; em caso de restrição, abra o link em nova aba normal ou janela privativa.
