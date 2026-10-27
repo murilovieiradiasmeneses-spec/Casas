@@ -945,6 +945,11 @@ export type Database = {
       }
     }
     Functions: {
+      master_authorize_agency_member: { Args: { _agency: string; _email: string; _role: string }; Returns: string }
+      activate_agency_access: { Args: { _agency: string }; Returns: boolean }
+      master_list_initial_access: { Args: never; Returns: {
+        agency_id:string;email:string;member_role:string;created_at:string;expires_at:string
+      }[] }
       crm_generate_rent_receivables: {
         Args: { _rental_id: string; _first_month: string; _months: number }
         Returns: number

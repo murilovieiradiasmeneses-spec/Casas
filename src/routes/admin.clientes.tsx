@@ -29,15 +29,17 @@ function Clients() {
     queryKey: ["white-label-clients"],
     enabled: isPlatformAdmin,
     queryFn: async () => {
-      const [agencies, members, pending] = await Promise.all([
+      const [agencies, members, pending, initialAccess] = await Promise.all([
         supabase.from("agencies").select("*").neq("slug", "casas").order("created_at", { ascending: false }),
         supabase.rpc("list_agency_users_admin"),
         supabase.rpc("master_list_agency_login_changes"),
+        supabase.rpc("master_list_initial_access"),
       ]);
       if (agencies.error) throw agencies.error;
       if (members.error) throw members.error;
       if (pending.error) throw pending.error;
-      return { agencies: agencies.data, members: members.data ?? [], pending: pending.data ?? [] };
+      if (initialAccess.error) throw initialAccess.error;
+      return { agencies: agencies.data, members: members.data ?? [], pending: pending.data ?? [], initialAccess: initialAccess.data ?? [] };
     },
   });
 
@@ -60,11 +62,20 @@ function Clients() {
   const assign = useMutation({
     mutationFn: async () => {
       if (!memberAgencyId || !memberEmail.includes("@")) throw Error("Selecione o cliente e informe o e-mail.");
-      const { error } = await supabase.rpc("assign_agency_member", { _agency_id: memberAgencyId, _email: memberEmail, _role: memberRole });
+      const { data, error } = await supabase.rpc("master_authorize_agency_member", {
+        _agency: memberAgencyId, _email: memberEmail, _role: memberRole,
+      });
       if (error) throw error;
+      return data;
     },
-    onSuccess: () => { toast.success("Acesso do cliente vinculado com sucesso."); setMemberEmail(""); qc.invalidateQueries({ queryKey: ["white-label-clients"] }); },
-    onError: (err) => toast.error((err as Error).message.includes("User not found") ? "Crie primeiro a conta em Cloud → Users e tente novamente." : "Não foi possível vincular este usuário."),
+    onSuccess: (status) => {
+      toast.success(status === "ativo"
+        ? "A conta já foi verificada e o acesso está liberado."
+        : "E-mail autorizado. Envie o link de cadastro ao responsável para que ele confirme seu endereço.");
+      setMemberEmail("");
+      qc.invalidateQueries({ queryKey: ["white-label-clients"] });
+    },
+    onError: (err) => toast.error((err as Error).message),
   });
 
   const changeClientEmail = useMutation({
@@ -117,11 +128,32 @@ function Clients() {
         </form>
         <form onSubmit={(e) => { e.preventDefault(); assign.mutate(); }} className="space-y-4 rounded-xl border bg-card p-6">
           <h2 className="flex items-center gap-2 text-2xl"><UserPlus className="h-5 w-5" /> Liberar acesso vendido</h2>
-          <p className="text-xs text-muted-foreground">Primeiro crie o usuário com e-mail e senha em Cloud → Users (Authentication). Depois vincule aqui. Não compartilhe uma senha geral com seus clientes.</p>
+          <p className="text-xs text-muted-foreground">Autorize o e-mail do cliente. Caso a conta ainda não exista, envie o link de cadastro da imobiliária. O cliente criará sua própria senha e confirmará o e-mail antes de receber acesso; não é necessário usar Cloud → Users.</p>
           <div className="space-y-1.5"><Label htmlFor="target">Cliente</Label><select id="target" value={memberAgencyId} onChange={(e) => setMemberAgencyId(e.target.value)} required className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="">Selecionar cliente</option>{q.data?.agencies.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></div>
-          <div className="space-y-1.5"><Label htmlFor="memberEmail">E-mail da conta existente</Label><Input id="memberEmail" type="email" required value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)} placeholder="cliente@imobiliaria.com.br" /></div>
+          <div className="space-y-1.5"><Label htmlFor="memberEmail">E-mail do responsável a autorizar</Label><Input id="memberEmail" type="email" required value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)} placeholder="cliente@imobiliaria.com.br" /></div>
           <div className="space-y-1.5"><Label htmlFor="memberRole">Permissão</Label><select id="memberRole" className="h-10 w-full rounded-md border bg-background px-3 text-sm" value={memberRole} onChange={(e) => setMemberRole(e.target.value as "owner" | "editor")}><option value="owner">Proprietário — imóveis e identidade visual</option><option value="editor">Editor — somente imóveis</option></select></div>
-          <Button disabled={assign.isPending} type="submit"><UserPlus className="h-4 w-4" /> {assign.isPending ? "Vinculando..." : "Conceder acesso"}</Button>
+          <Button disabled={assign.isPending} type="submit"><UserPlus className="h-4 w-4" /> {assign.isPending ? "Autorizando..." : "Autorizar acesso"}</Button>
+          {memberAgencyId&&(()=>{
+            const agency=q.data?.agencies.find(a=>a.id===memberAgencyId);
+            if(!agency)return null;
+            const url=typeof window!=="undefined"
+              ? window.location.origin+"/acesso-cliente?empresa="+encodeURIComponent(agency.slug)
+              : "/acesso-cliente?empresa="+encodeURIComponent(agency.slug);
+            return <div className="mt-3 rounded-xl border bg-secondary/40 p-3 text-sm">
+              <p className="font-semibold">Link de cadastro da imobiliária</p>
+              <p className="mt-2 break-all text-xs text-muted-foreground">{url}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button type="button" size="sm" variant="outline" onClick={async()=>{
+                  try{await navigator.clipboard.writeText(url);toast.success("Link copiado.");}
+                  catch{toast.info("Selecione e copie o endereço acima.");}
+                }}><Copy className="h-3.5 w-3.5"/> Copiar link</Button>
+                <Button type="button" size="sm" variant="outline" asChild>
+                  <a href={"https://wa.me/?text="+encodeURIComponent("Seu acesso ao CASAS para "+agency.name+" foi autorizado. Crie sua senha e confirme seu e-mail pelo link: "+url)}
+                    target="_blank" rel="noopener noreferrer"><Send className="h-3.5 w-3.5"/> Enviar pelo WhatsApp</a>
+                </Button>
+              </div>
+            </div>;
+          })()}
         </form>
       </div>
       <div>
@@ -133,6 +165,8 @@ function Clients() {
               {a.logo_url ? <img src={a.logo_url} className="h-12 w-16 object-contain" alt="" /> : <Building2 className="h-9 w-9 text-primary" />}
               <div className="min-w-0 flex-1"><p className="font-semibold">{a.name}</p><p className="text-xs text-muted-foreground">Código: {a.slug}</p>
                 <p className="mt-1 text-xs text-muted-foreground">Usuários: {q.data?.members.filter((m) => m.agency_id === a.id).length ? q.data.members.filter((m) => m.agency_id === a.id).map((m) => m.email + " (" + (m.role === "owner" ? "Proprietário" : "Editor") + ")").join(", ") : "Nenhum usuário vinculado"}</p>
+                {q.data?.initialAccess.filter(item=>item.agency_id===a.id).map(item=>
+                  <p key={item.email} className="mt-1 text-xs font-medium text-amber-700">Aguardando confirmação: {item.email} · até {new Date(item.expires_at).toLocaleDateString("pt-BR")}</p>)}
               </div>
               <span className={"rounded-full px-3 py-1 text-xs " + (a.active ? "bg-green-100 text-green-900" : "bg-red-100 text-red-800")}>{a.active ? "Ativo" : "Suspenso"}</span>
               <a href={"/v/" + a.slug} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">Vitrine <ExternalLink className="h-3 w-3" /></a>

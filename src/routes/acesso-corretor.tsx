@@ -24,6 +24,7 @@ function BrokerAccess(){
   const [sessionEmail,setSessionEmail]=useState<string|null>(null);
   const [checked,setChecked]=useState(false);
   const [needsEmailConfirmation,setNeedsEmailConfirmation]=useState(false);
+  const [confirmationEmail,setConfirmationEmail]=useState("");
   const agency=useQuery({
     queryKey:["broker-company",slug],enabled:!!slug,retry:false,
     queryFn:async()=>{
@@ -71,6 +72,7 @@ function BrokerAccess(){
         });
         if(error)throw error;
         if(!data.session){
+          setConfirmationEmail(email.trim().toLowerCase());
           setNeedsEmailConfirmation(true);
           toast.success("Verifique seu e-mail e confirme seu cadastro. Depois volte a esta página.");
         }else{
@@ -83,6 +85,19 @@ function BrokerAccess(){
       }
     }catch(e){toast.error((e as Error).message);}
     finally{setBusy(false);setPassword("");setConfirm("");}
+  }
+  async function resendConfirmation(){
+    if(!confirmationEmail)return toast.error("Informe seu e-mail primeiro.");
+    setBusy(true);
+    try{
+      const {error}=await supabase.auth.resend({
+        type:"signup",email:confirmationEmail,
+        options:{emailRedirectTo:window.location.origin+"/acesso-corretor?empresa="+encodeURIComponent(slug)},
+      });
+      if(error)throw error;
+      toast.success("Se a conta ainda estiver pendente, um novo e-mail de confirmação será enviado.");
+    }catch(e){toast.error((e as Error).message);}
+    finally{setBusy(false);}
   }
   async function signOut(){
     await supabase.auth.signOut();
@@ -118,7 +133,8 @@ function BrokerAccess(){
         </div>
         :needsEmailConfirmation?<div className="mt-6 space-y-3">
           <p className="font-semibold">Confirme seu e-mail antes de continuar</p>
-          <p className="text-sm text-muted-foreground">Acesse a caixa de entrada do e-mail cadastrado e confirme sua conta. Depois retorne a este link e faça login.</p>
+          <p className="text-sm text-muted-foreground">Verifique a caixa de entrada de {confirmationEmail}, inclusive spam. Confirme o endereço e depois retorne a este link.</p>
+          <Button className="w-full" variant="outline" disabled={busy} onClick={()=>void resendConfirmation()}>{busy?"Enviando...":"Reenviar e-mail de confirmação"}</Button>
           <Button className="w-full" variant="outline" onClick={()=>{setNeedsEmailConfirmation(false);setMode("login");}}>Já confirmei, fazer login</Button>
         </div>
         :<>
