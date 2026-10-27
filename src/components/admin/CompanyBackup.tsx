@@ -54,7 +54,7 @@ export function CompanyBackup() {
       <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-primary"><HardDriveDownload className="h-4 w-4"/> Proteção dos seus dados</span>
       <h1 className="mt-3 text-3xl font-bold sm:text-4xl">Backup da imobiliária</h1>
       <p className="mt-3 text-sm text-muted-foreground">
-        Baixe uma cópia de {agency?.name??"sua empresa"} com imóveis, fotos, identidade visual, leads, visitas, vendas e dados da equipe.
+        Baixe uma cópia de {agency?.name??"sua empresa"} com imóveis, fotos, identidade visual, leads, visitas, vendas, contratos de aluguel, mensalidades e dados da equipe.
       </p>
       <div className="mt-7 grid gap-3 sm:grid-cols-3">
         {choices.map(item=><button key={item.id} type="button" onClick={()=>setCadence(item.id)} disabled={busy}
@@ -76,7 +76,7 @@ export function CompanyBackup() {
     <div className="rounded-2xl border bg-card p-6">
       <h2 className="flex items-center gap-2 text-lg"><FileArchive className="h-5 w-5 text-primary"/> O que será salvo?</h2>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-        Todos os cadastros e seus detalhes, histórico comercial, corretoras e corretores vinculados, personalização da vitrine e arquivos de fotos armazenados no CASAS.
+        Todos os cadastros, histórico comercial, contratos de locação e aluguéis a receber/recebidos, corretores vinculados, personalização da vitrine e fotos armazenadas no CASAS.
         Não inclui senhas nem sessões de login. Se alguma imagem não puder ser copiada, o backup será interrompido para evitar um ZIP incompleto.
       </p>
       <p className="mt-3 text-sm font-medium">Atenção: este arquivo contém dados pessoais. Guarde-o em local privado, preferencialmente com proteção por senha. A importação/restauração ainda não é automática.</p>

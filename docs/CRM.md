@@ -171,3 +171,24 @@ Em **CRM → Negociações e vendas**, cada registro mostra os botões **Editar 
 - Após qualquer mudança, a consulta da empresa é invalidada, e gráficos, previsões e faturamento refletem os dados mais recentes. O faturamento é apenas valor das negociações **ganhas**, não recebimento bancário.
 
 Testes: `src/test/crm-negotiations.test.ts` cobre preservação da data de fechamento, ajuste de valor e atualização dos indicadores, exclusão e distinção de previsão/faturamento.
+
+## Locações integradas aos imóveis e aluguéis a receber
+
+O CRM do CASAS agora tem a aba **Locações**, visível ao proprietário, editores autorizados e master. Os corretores continuam vendo somente suas próprias carteiras de leads e negociações (não têm acesso aos dados financeiros de locações). Os imóveis continuam únicos no catálogo CASAS, sem cadastro paralelo.
+
+**Passo a passo:**
+1. Em **Imóveis**, cadastrar ou editar o imóvel e marcar **Finalidade: Locação**. O mesmo imóvel poderá ser usado diretamente no CRM.
+2. Em **CRM → Locações → Contratos de aluguel**, clicar **Novo contrato**. Escolher o imóvel, selecionar um lead existente (opcional), informar nome/contato do inquilino, aluguel mensal, dia do vencimento (1 a 28), início, término opcional e observações.
+3. Ao iniciar contrato ativo, o imóvel passa automaticamente a **Alugado** no catálogo. Ao encerrar o contrato, volta a **Disponível**. Imóveis com contrato ativo não podem mudar de finalidade nem ser vinculados a dois contratos ativos simultâneos.
+4. No card do contrato, escolher o primeiro mês e **Gerar parcelas** (1, 3, 6 ou 12). O banco cria uma cobrança mensal com valor original do contrato e vencimento fixo. Não duplica competências já cadastradas e não sobrescreve valores antigos. Pode também ir a **Aluguéis a receber → Cadastrar aluguel a receber** para registrar um mês manualmente.
+5. Na aba **Aluguéis a receber**, filtrar Todos / Pendentes / Vencidos / Recebidos. Para registrar o pagamento, clicar **Marcar recebido**. O status e o instante do recebimento ficam armazenados. Apenas proprietário/master pode desfazer uma baixa já registrada.
+
+**Indicadores:** contratos cadastrados/ativos, montante mensal contratado, saldo a receber, atrasados, vencimentos próximos, recebidos no mês. Na **Visão geral** esses indicadores aparecem separadamente dos gráficos de vendas. Faturamento de vendas não soma contratos de locação, e os números de aluguéis correspondem aos recebimentos **manuais**, sem conciliação bancária.
+
+**Segurança:** `crm_rentals` e `crm_rent_receivables` possuem isolamento RLS por `agency_id`, com acesso somente a quem passa em `crm_is_manager`. Anônimos e corretores não podem consultar informações financeiras dos contratos. Gatilhos asseguram que os imóveis e os leads pertencem à própria imobiliária e bloqueiam a migração de contrato entre empresas. A função `crm_generate_rent_receivables` verifica empresa, contrato ativo e limite de mensalidades no próprio banco.
+
+**Backup:** `backup.json` agora inclui `crm_rentals` e `crm_rent_receivables` da imobiliária no ZIP individual. Contratos, parcelas e dados de inquilinos são privados. A restauração ainda exige processo técnico.
+
+**Observações:** o CASAS não envia boletos, Pix ou lembretes automáticos, não recolhe pagamentos e não faz integração bancária nesta etapa. O dia de vencimento fica entre 1 e 28 para funcionar em todos os meses. Evite cadastrar dados pessoais de inquilinos além do necessário e trate os backups conforme a LGPD.
+
+Migrações: `0025_rental_crm.sql` e `0026_rental_integrity_guards.sql`. Testes unitários: `src/test/rentals.test.ts`. Antes da operação comercial, testar com uma imobiliária e um imóvel de locação, criar contrato, gerar parcelas, marcar recebido e conferir backup e relatórios; não há teste de ponta a ponta confirmado para esta entrega.
