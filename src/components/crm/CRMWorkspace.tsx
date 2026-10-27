@@ -65,6 +65,8 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
   const [search,setSearch]=useState("");
   const [leadDraft,setLeadDraft]=useState<Partial<Lead>|null>(null);
   const [leadToDelete,setLeadToDelete]=useState<Lead|null>(null);
+  const [showLeadDeletePicker,setShowLeadDeletePicker]=useState(false);
+  const [leadDeleteSelection,setLeadDeleteSelection]=useState("");
   const [deleteConfirmation,setDeleteConfirmation]=useState("");
   const [visitDraft,setVisitDraft]=useState<Partial<Visit>|null>(null);
   const [dealDraft,setDealDraft]=useState<Partial<Deal>|null>(null);
@@ -152,7 +154,9 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
 
   const updateLead=(id:string,patch:Partial<Lead>)=>run(async()=>supabase.from("crm_leads").update(patch).eq("id",id).eq("agency_id",agencyId),"Lead atualizado.");
   const requestLeadDeletion=(lead:Lead)=>{
-    if(isBroker)return;
+    if(!canManageTeam)return;
+    setShowLeadDeletePicker(false);
+    setLeadDeleteSelection("");
     setLeadDraft(null);
     setLeadToDelete(lead);
     setDeleteConfirmation("");
@@ -163,7 +167,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
     setDeleteConfirmation("");
   };
   const deleteLead=async()=>{
-    if(isBroker||!leadToDelete||deleteConfirmation!=="EXCLUIR"||busy)return;
+    if(!canManageTeam||!leadToDelete||deleteConfirmation!=="EXCLUIR"||busy)return;
     const target=leadToDelete;
     // A scoped DELETE returns precisely one row; RLS enforces agency management,
     // and FK ON DELETE CASCADE removes linked visits and deals atomically.
@@ -383,6 +387,12 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
           <div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"/>
             <Input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar cliente ou imóvel" className="w-64 pl-9"/></div>
           {!isBroker&&<Button onClick={()=>setLeadDraft({name:"",stage:"novo",source:"manual",assigned_agent_id:null})}><Plus/> Cadastrar</Button>}
+          {canManageTeam&&<Button type="button" variant="outline" disabled={busy||leads.length===0}
+            className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={()=>{
+              setLeadDeleteSelection("");
+              setShowLeadDeletePicker(true);
+            }}><Trash2 className="h-4 w-4"/> Excluir lead</Button>}
         </div>
       </div>
       <div className="flex snap-x gap-4 overflow-x-auto pb-4">
@@ -404,7 +414,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
                 <p className="mt-2 text-xs font-semibold text-primary">{agentNameById(l.assigned_agent_id)}</p>
                 <div className="mt-3 flex items-center gap-2">
                   <button type="button" onClick={()=>setLeadDraft({...l})} className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-muted">Editar</button>
-                  {!isBroker&&<button type="button" aria-label={"Excluir lead "+l.name} disabled={busy}
+                  {canManageTeam&&<button type="button" aria-label={"Excluir lead "+l.name} disabled={busy}
                     onClick={()=>requestLeadDeletion(l)}
                     className="inline-flex items-center gap-1 rounded-lg border border-destructive/30 px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50">
                     <Trash2 className="h-3.5 w-3.5"/> Excluir
@@ -557,7 +567,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
         <Field label="Observações"><Textarea rows={3} value={leadDraft.notes??""} onChange={e=>setLeadDraft({...leadDraft,notes:e.target.value})}/></Field>
         <Button disabled={busy} type="submit" className="w-full">{busy?"Salvando...":"Salvar lead"}</Button>
       </form>
-      {!isBroker&&leadDraft.id&&<div className="mt-5 border-t pt-4">
+      {canManageTeam&&leadDraft.id&&<div className="mt-5 border-t pt-4">
         <Button type="button" variant="outline" disabled={busy}
           className="w-full gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
           onClick={()=>{
@@ -567,7 +577,32 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
       </div>}
     </Modal>}
 
-    {!isBroker&&leadToDelete&&<Modal title="Confirmar exclusão do lead" close={closeLeadDeletion}>
+    {canManageTeam&&showLeadDeletePicker&&<Modal title="Excluir lead" close={()=>{if(!busy){setShowLeadDeletePicker(false);setLeadDeleteSelection("");}}}>
+      <div className="space-y-5">
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Selecione o lead que deseja apagar da imobiliária <strong>{agencyName}</strong>.
+          A próxima etapa mostrará o histórico que também será excluído.
+        </p>
+        <div className="space-y-2">
+          <Label htmlFor="lead-to-delete">Lead cadastrado</Label>
+          <select id="lead-to-delete" className={fieldStyle} value={leadDeleteSelection}
+            onChange={e=>setLeadDeleteSelection(e.target.value)}>
+            <option value="">Selecione um lead...</option>
+            {leads.map(l=><option key={l.id} value={l.id}>{l.name}{l.phone?" · "+l.phone:""}</option>)}
+          </select>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Button type="button" variant="outline" disabled={busy}
+            onClick={()=>{setShowLeadDeletePicker(false);setLeadDeleteSelection("");}}>Cancelar</Button>
+          <Button type="button" variant="destructive" disabled={busy||!leadDeleteSelection}
+            onClick={()=>{
+              const chosen=leads.find(l=>l.id===leadDeleteSelection);
+              if(chosen)requestLeadDeletion(chosen);
+            }}><Trash2 className="h-4 w-4"/> Continuar para confirmação</Button>
+        </div>
+      </div>
+    </Modal>}
+    {canManageTeam&&leadToDelete&&<Modal title="Confirmar exclusão do lead" close={closeLeadDeletion}>
       {(()=>{
         const impact=leadDeletionImpact(leadToDelete.id,visits,deals);
         return <div className="space-y-5">
