@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Building2, CheckCircle2, LockKeyhole, ShieldCheck } from "lucide-react";
@@ -14,7 +14,6 @@ export const Route=createFileRoute("/acesso-corretor")({
   component:BrokerAccess,
 });
 function BrokerAccess(){
-  const navigate=useNavigate();
   const qc=useQueryClient();
   const slug=typeof window!=="undefined"?new URLSearchParams(window.location.search).get("empresa")??"":"";
   const [mode,setMode]=useState<"register"|"login">("register");
@@ -52,7 +51,9 @@ function BrokerAccess(){
       if(error)throw error;
       await qc.invalidateQueries({queryKey:["crm-broker-access"]});
       toast.success("Seu acesso ao CRM está ativo.");
-      await navigate({to:"/corretor",replace:true});
+      // Preserve the company requested in this link even when the user works for
+      // multiple agencies. A full navigation refreshes auth-bound caches.
+      window.location.replace("/corretor?empresa="+encodeURIComponent(slug));
     }catch(e){toast.error((e as Error).message);}
     finally{setBusy(false);}
   }
@@ -83,7 +84,11 @@ function BrokerAccess(){
     }catch(e){toast.error((e as Error).message);}
     finally{setBusy(false);setPassword("");setConfirm("");}
   }
-  async function signOut(){await supabase.auth.signOut();setSessionEmail(null);}
+  async function signOut(){
+    await supabase.auth.signOut();
+    qc.clear();
+    setSessionEmail(null);
+  }
   return <main className="mx-auto max-w-3xl px-4 py-12 sm:py-20">
     <div className="mb-8 text-center">
       <span className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-2 font-semibold text-primary-foreground"><Building2 className="h-4 w-4"/> CASAS</span>
@@ -99,6 +104,10 @@ function BrokerAccess(){
           <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary"><ShieldCheck className="h-4 w-4"/> Área comercial</p>
           <h2 className="mt-3 text-2xl font-semibold">{agency.data.name}</h2>
           <p className="mt-2 text-sm text-muted-foreground">O proprietário controla quais e-mails podem acessar esta equipe.</p>
+          <p className="mt-2 text-xs font-medium text-muted-foreground">
+            Se estiver testando com outra conta no mesmo computador, abra o acesso em uma aba separada.
+            Não é preciso sair do painel do proprietário em outra aba.
+          </p>
         </div>
         {!checked?<p className="mt-6 text-sm">Verificando sua sessão...</p>
         :sessionEmail?<div className="mt-6 space-y-4">

@@ -88,7 +88,11 @@ function BrokerPortal(){
       </div>
     </div>
   </main>;
-  const m=active.find(p=>p.id===selected)??active[0];
+  // Initial selection is fixed by the activation link, not arbitrary SQL order.
+  const requestedSlug=typeof window==="undefined"?"":new URLSearchParams(window.location.search).get("empresa")??"";
+  const m=active.find(p=>p.id===selected)
+    ??active.find(p=>p.agency_slug===requestedSlug)
+    ??active[0];
   return <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
     <div className="mb-7 flex flex-wrap items-center justify-between gap-4 rounded-[26px] border bg-card p-6 shadow-sm">
       <div><p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary"><UserRound className="h-4 w-4"/> Área do corretor</p>

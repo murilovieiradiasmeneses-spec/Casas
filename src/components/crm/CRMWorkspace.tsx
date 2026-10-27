@@ -470,6 +470,9 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
                   <a href={"https://wa.me/?text="+encodeURIComponent("Olá! Seu acesso ao CRM foi autorizado. Entre com seu e-mail por este link: "+brokerAccessUrl)}
                      target="_blank" rel="noopener noreferrer">Enviar pelo WhatsApp</a>
                 </Button>
+                <Button type="button" variant="outline" size="sm" asChild>
+                  <a href={brokerAccessUrl} target="_blank" rel="noopener noreferrer">Testar em outra aba</a>
+                </Button>
               </div>
             </div>
           </>:<p className="mt-4 rounded-xl border p-3 text-sm text-muted-foreground">Somente o proprietário da imobiliária e o administrador master podem liberar corretores.</p>}
