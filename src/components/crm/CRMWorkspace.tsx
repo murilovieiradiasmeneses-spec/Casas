@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CRMNotifications } from "@/components/crm/CRMNotifications";
+import { CRMRentals, RentalSummary } from "@/components/crm/CRMRentals";
 import { getCRMAlerts } from "@/lib/crm-notifications";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -24,8 +25,8 @@ import {
   type LeadStage, type DealStage,
 } from "@/lib/crm";
 
-type PropertyOption = { id: string; title: string };
-type CRMTab = "visao" | "leads" | "visitas" | "negociacoes" | "equipe";
+type PropertyOption = { id: string; title: string; purpose: string; status: string; price: number; neighborhood?: string };
+type CRMTab = "visao" | "leads" | "visitas" | "negociacoes" | "locacoes" | "equipe";
 type BrokerAuthorization = {
   id:string;name:string;email:string;state:"ativo"|"autorizado"|"revogado";
   authorized_at:string;activated_at:string|null;
@@ -48,6 +49,7 @@ const tabs: { key:CRMTab;label:string;icon:typeof Users }[] = [
   {key:"leads",label:"Funil de leads",icon:Columns3},
   {key:"visitas",label:"Visitas",icon:CalendarDays},
   {key:"negociacoes",label:"Negociações",icon:Handshake},
+  {key:"locacoes",label:"Locações",icon:CircleDollarSign},
   {key:"equipe",label:"Equipe",icon:Users},
 ];
 const fieldStyle="h-11 w-full rounded-xl border border-input bg-card px-3 text-sm";
@@ -84,8 +86,8 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
         supabase.from("crm_deals").select("*").eq("agency_id",agencyId).order("created_at",{ascending:false}),
         supabase.from("crm_salespeople").select("*").eq("agency_id",agencyId).order("name"),
         isBroker
-          ? supabase.from("public_property_listings").select("id,title").eq("agency_id",agencyId).order("title")
-          : supabase.from("properties").select("id,title").eq("agency_id",agencyId).order("title"),
+          ? supabase.from("public_property_listings").select("id,title,purpose,status,price,neighborhood").eq("agency_id",agencyId).order("title")
+          : supabase.from("properties").select("id,title,purpose,status,price,neighborhood").eq("agency_id",agencyId).order("title"),
       ]);
       for(const item of [a,b,c,d,e])if(item.error)throw item.error;
       let settings:CRMSettings|null=null,seats=0,seatsReserved=0,canManageTeam=false;
@@ -332,7 +334,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
         else setTab("visitas");
       }}/>
     <nav aria-label="Áreas do CRM" className="flex flex-wrap gap-2 rounded-2xl border border-border bg-card p-2 shadow-sm">
-      {tabs.filter(t=>!isBroker||t.key!=="equipe").map(({key,label,icon:Icon})=>
+      {tabs.filter(t=>!isBroker||(t.key!=="equipe"&&t.key!=="locacoes")).map(({key,label,icon:Icon})=>
         <button key={key} type="button" onClick={()=>setTab(key)}
           className={"inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-colors "+
           (tab===key?"bg-primary text-primary-foreground shadow-sm":"text-muted-foreground hover:bg-muted hover:text-foreground")}>
@@ -408,8 +410,11 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
         </article>
       </div>
       <p className="text-xs text-muted-foreground">Os gráficos são gerados a partir dos registros do CRM; valores de negócios ganhos são declarados manualmente e não representam confirmação bancária de recebimento.</p>
+      {!isBroker&&<RentalSummary agencyId={agencyId} onOpen={()=>setTab("locacoes")}/>}
     </div>}
 
+    {tab==="locacoes" && !isBroker && <CRMRentals agencyId={agencyId}
+      properties={properties} leads={leads.map(l=>({id:l.id,name:l.name,phone:l.phone,email:l.email}))}/>}
     {tab==="leads" && <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div><h3 className="text-2xl">{isBroker?"Leads encaminhados para mim":"Leads e distribuição"}</h3>
@@ -603,7 +608,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
           </Field>
           <Field label="Origem"><select className={fieldStyle} value={leadDraft.source??"manual"} onChange={e=>setLeadDraft({...leadDraft,source:e.target.value as Lead["source"]})}>{Object.entries(SOURCES).map(([k,v])=><option key={k} value={k}>{v}</option>)}</select></Field>
           <Field label="Etapa"><select className={fieldStyle} value={leadDraft.stage??"novo"} onChange={e=>setLeadDraft({...leadDraft,stage:e.target.value as LeadStage})}>{LEAD_STAGES.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
-          <Field label="Imóvel de interesse"><select className={fieldStyle} value={leadDraft.property_id??""} onChange={e=>setLeadDraft({...leadDraft,property_id:e.target.value||null})}><option value="">Não definido</option>{properties.map(p=><option key={p.id} value={p.id}>{p.title}</option>)}</select></Field>
+          <Field label="Imóvel de interesse"><select className={fieldStyle} value={leadDraft.property_id??""} onChange={e=>setLeadDraft({...leadDraft,property_id:e.target.value||null})}><option value="">Não definido</option>{properties.map(p=><option key={p.id} value={p.id}>{p.title} · {p.purpose==="locacao"?"Locação":"Venda"}</option>)}</select></Field>
           {!isBroker&&<Field label="Encaminhar para corretor"><select className={fieldStyle} value={leadDraft.assigned_agent_id??""} onChange={e=>setLeadDraft({...leadDraft,assigned_agent_id:e.target.value||null})}><option value="">Sem atribuição</option>{team.filter(s=>s.active).map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>}
           <Field label="Orçamento (R$)"><Input type="number" min="0" step="0.01" value={leadDraft.budget_brl??""} onChange={e=>setLeadDraft({...leadDraft,budget_brl:e.target.value?Number(e.target.value):null})}/></Field>
           <Field label="Próximo contato"><Input type="datetime-local" value={leadDraft.next_contact_at?todayLocal(leadDraft.next_contact_at):""} onChange={e=>setLeadDraft({...leadDraft,next_contact_at:e.target.value?new Date(e.target.value).toISOString():null})}/></Field>
@@ -695,7 +700,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
       <Field label="Interessado"><select required className={fieldStyle} value={visitDraft.lead_id??""} onChange={e=>{const l=leadById(e.target.value);setVisitDraft({...visitDraft,lead_id:e.target.value,property_id:l?.property_id??""});}}>
         <option value="">Selecione o lead</option>{leads.map(l=><option key={l.id} value={l.id}>{l.name}</option>)}</select></Field>
       <Field label="Imóvel"><select required className={fieldStyle} value={visitDraft.property_id??""} onChange={e=>setVisitDraft({...visitDraft,property_id:e.target.value})}>
-        <option value="">Selecione o imóvel</option>{properties.map(p=><option key={p.id} value={p.id}>{p.title}</option>)}</select></Field>
+        <option value="">Selecione o imóvel</option>{properties.map(p=><option key={p.id} value={p.id}>{p.title} · {p.purpose==="locacao"?"Locação":"Venda"}</option>)}</select></Field>
       <Field label="Data e horário"><Input type="datetime-local" required value={visitDraft.scheduled_at?todayLocal(visitDraft.scheduled_at):""} onChange={e=>setVisitDraft({...visitDraft,scheduled_at:e.target.value?new Date(e.target.value).toISOString():""})}/></Field>
       <Field label="Observações"><Textarea rows={3} value={visitDraft.notes??""} onChange={e=>setVisitDraft({...visitDraft,notes:e.target.value})}/></Field>
       <Button type="submit" disabled={busy} className="w-full">Salvar visita</Button>
@@ -705,7 +710,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
       <Field label="Nome da negociação"><Input required value={dealDraft.title??""} onChange={e=>setDealDraft({...dealDraft,title:e.target.value})} placeholder="Venda do imóvel no Jardim..."/></Field>
       <Field label="Lead interessado"><select className={fieldStyle} required value={dealDraft.lead_id??""} onChange={e=>{const l=leadById(e.target.value);setDealDraft({...dealDraft,lead_id:e.target.value,property_id:l?.property_id??null});}}>
         <option value="">Selecione o lead</option>{leads.map(l=><option key={l.id} value={l.id}>{l.name}</option>)}</select></Field>
-      <Field label="Imóvel"><select className={fieldStyle} value={dealDraft.property_id??""} onChange={e=>setDealDraft({...dealDraft,property_id:e.target.value||null})}><option value="">Não definido</option>{properties.map(p=><option key={p.id} value={p.id}>{p.title}</option>)}</select></Field>
+      <Field label="Imóvel"><select className={fieldStyle} value={dealDraft.property_id??""} onChange={e=>setDealDraft({...dealDraft,property_id:e.target.value||null})}><option value="">Não definido</option>{properties.map(p=><option key={p.id} value={p.id}>{p.title} · {p.purpose==="locacao"?"Locação":"Venda"}</option>)}</select></Field>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Valor negociado (R$)"><Input type="number" min="0" step=".01" required value={dealDraft.amount_brl??0} onChange={e=>setDealDraft({...dealDraft,amount_brl:Number(e.target.value)})}/></Field>
         <Field label="Etapa"><select className={fieldStyle} value={dealDraft.status??"proposta"} onChange={e=>setDealDraft({...dealDraft,status:e.target.value as DealStage})}>{DEAL_STAGES.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></Field>
