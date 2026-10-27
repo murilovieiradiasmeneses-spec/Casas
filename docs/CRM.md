@@ -147,3 +147,11 @@ As sessões de autenticação do CASAS são armazenadas em `sessionStorage` **po
 - O link de ativação guarda o `slug` da imobiliária e, ao abrir `/corretor?empresa=<slug>`, prioriza **essa** carteira quando a mesma conta tiver vínculos em mais de uma imobiliária.
 - O banco continua sendo a fonte de verdade para autorizações; separar sessões não concede nenhuma permissão extra a usuários.
 - Teste com dois usuários em abas diferentes, inclusive na prévia do Lovable. O navegador pode bloquear cookies/armazenamento de terceiros; em caso de restrição, abra o link em nova aba normal ou janela privativa.
+
+## Exclusão de leads pelo gestor
+
+Na aba **Funil de leads**, cada card tem a opção **Excluir**, e o formulário de **Editar lead** também tem **Excluir este lead**. A opção aparece apenas para gestor/master, nunca no painel do corretor. A política de DELETE no PostgreSQL `crm_leads` reforça `crm_is_manager(agency_id)` e, portanto, o corretor não pode contornar a restrição pela API.
+
+A exclusão tem duas etapas: abrir o diálogo de confirmação (com nome/empresa do lead e contagem de visitas, negociações e vendas ganhas) e digitar `EXCLUIR`. O comando envia `DELETE` filtrado por **id do lead e agency_id**, espera o banco retornar exatamente um registro eliminado e só então atualiza o CRM. Se a permissão falhar ou o registro já não existir, o sistema mostra erro e não anuncia sucesso.
+
+**Exclusão definitiva:** as FKs `crm_visits.lead_id` e `crm_deals.lead_id` estão configuradas com `ON DELETE CASCADE`. Excluir o lead apaga permanentemente essas visitas e negociações, incluindo vendas concluídas: gráficos de faturamento, conversão e histórico comercial são recalculados. Imóveis e outros leads permanecem intactos. O usuário deve guardar um backup antes de excluir dados importantes. Não existe lixeira/recuperação automática nesta versão.
