@@ -34,7 +34,7 @@ AS $$
       SELECT 1 FROM public.crm_salespeople s
       WHERE s.agency_id=b.agency_id AND s.user_id=auth.uid()
     )
-  ORDER BY agency_name,agency_slug
+  ORDER BY 4,5
 $$;
 REVOKE ALL ON FUNCTION public.crm_my_broker_portfolios() FROM PUBLIC,anon,authenticated;
 GRANT EXECUTE ON FUNCTION public.crm_my_broker_portfolios() TO authenticated;
