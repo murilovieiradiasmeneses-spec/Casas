@@ -150,7 +150,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
 
   const updateLead=(id:string,patch:Partial<Lead>)=>run(async()=>supabase.from("crm_leads").update(patch).eq("id",id).eq("agency_id",agencyId),"Lead atualizado.");
   const forwardLead=(id:string,agentId:string|null)=>run(
-    async()=>supabase.from("crm_leads").update({assigned_agent_id:agentId}).eq("id",id).eq("agency_id",agencyId),
+    async()=>supabase.from("crm_leads").update({assigned_agent_id:agentId}).eq("id",id).eq("agency_id",agencyId).select("id").single(),
     agentId?"Lead enviado para o corretor.":"Lead devolvido à carteira da imobiliária."
   );
   const updateVisit=(id:string,status:Visit["status"])=>run(async()=>supabase.from("crm_visits").update({status}).eq("id",id).eq("agency_id",agencyId),"Visita atualizada.");
@@ -386,8 +386,12 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
                   <select id={"forward-"+l.id} aria-label={"Enviar "+l.name+" para corretor"} className="w-full rounded-lg border bg-background px-2 py-2 text-xs"
                     value={l.assigned_agent_id??""} disabled={busy} onChange={e=>void forwardLead(l.id,e.target.value||null)}>
                     <option value="">Carteira da imobiliária (não enviado)</option>
+                    {l.assigned_agent_id&&!team.some(a=>a.id===l.assigned_agent_id&&a.active)&&
+                      <option value={l.assigned_agent_id} disabled>Corretor desativado — redistribua o lead</option>}
                     {team.filter(a=>a.active).map(a=><option key={a.id} value={a.id}>{a.name}</option>)}
                   </select>
+                  {l.assigned_agent_id&&!team.some(a=>a.id===l.assigned_agent_id&&a.active)&&
+                    <p className="mt-2 text-xs font-medium text-amber-700">Corretor sem acesso ativo: redistribua este lead para que alguém possa atendê-lo.</p>}
                 </div>}
               </article>;
             })}
@@ -481,7 +485,12 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
         </div>)}
         {team.length?team.map(p=><div key={p.id} className="flex flex-wrap items-center gap-3 border-b border-border/70 py-4 last:border-b-0">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-secondary font-bold text-primary">{p.name.slice(0,1).toUpperCase()}</div>
-          <div className="min-w-0 flex-1"><p className="font-semibold">{p.name}</p><p className="text-xs text-muted-foreground">{p.email}</p></div>
+          <div className="min-w-0 flex-1"><p className="font-semibold">{p.name}</p>
+            <p className="text-xs text-muted-foreground">{p.email}</p>
+            <p className={"mt-1 text-xs "+(!p.active&&leads.some(l=>l.assigned_agent_id===p.id)?"font-semibold text-amber-700":"text-muted-foreground")}>
+              {leads.filter(l=>l.assigned_agent_id===p.id).length} leads atribuídos
+              {!p.active&&leads.some(l=>l.assigned_agent_id===p.id)?" · atendimento bloqueado enquanto desativado":""}
+            </p></div>
           <span className="text-sm text-muted-foreground">{p.active?"Ativo":"Desativado"}</span>
           {canManageTeam&&<Button size="sm" variant="outline" disabled={busy} onClick={()=>void run(()=>supabase.rpc("crm_toggle_salesperson",{_agent:p.id,_active:!p.active}),"Acesso do corretor atualizado.")}>
             {p.active?"Desativar":"Reativar"}
