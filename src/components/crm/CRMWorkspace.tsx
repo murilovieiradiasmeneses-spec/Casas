@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import {
   ArrowUpRight, CalendarDays, ChartNoAxesCombined, CircleDollarSign,
-  Handshake, Columns3, MessageCircle, Plus, Users,
+  Handshake, Columns3, MessageCircle, Plus, Users, Trash2, AlertTriangle,
   UserRound, TrendingUp, Search, ClipboardCheck, UserPlus, ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  crmBRL, crmMetrics, revenueByMonth, LEAD_STAGES, DEAL_STAGES,
+  crmBRL, crmMetrics, revenueByMonth, leadDeletionImpact, LEAD_STAGES, DEAL_STAGES,
   VISIT_STATUSES, SOURCES, PLANS, crmPhone,
   type Lead, type Deal, type Visit, type Salesperson, type CRMSettings,
   type LeadStage, type DealStage,
@@ -64,6 +64,8 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
   const [busy,setBusy]=useState(false);
   const [search,setSearch]=useState("");
   const [leadDraft,setLeadDraft]=useState<Partial<Lead>|null>(null);
+  const [leadToDelete,setLeadToDelete]=useState<Lead|null>(null);
+  const [deleteConfirmation,setDeleteConfirmation]=useState("");
   const [visitDraft,setVisitDraft]=useState<Partial<Visit>|null>(null);
   const [dealDraft,setDealDraft]=useState<Partial<Deal>|null>(null);
   const [agentName,setAgentName]=useState("");
@@ -149,6 +151,33 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
   })).sort((a,b)=>b.total-a.total);
 
   const updateLead=(id:string,patch:Partial<Lead>)=>run(async()=>supabase.from("crm_leads").update(patch).eq("id",id).eq("agency_id",agencyId),"Lead atualizado.");
+  const requestLeadDeletion=(lead:Lead)=>{
+    if(isBroker)return;
+    setLeadDraft(null);
+    setLeadToDelete(lead);
+    setDeleteConfirmation("");
+  };
+  const closeLeadDeletion=()=>{
+    if(busy)return;
+    setLeadToDelete(null);
+    setDeleteConfirmation("");
+  };
+  const deleteLead=async()=>{
+    if(isBroker||!leadToDelete||deleteConfirmation!=="EXCLUIR"||busy)return;
+    const target=leadToDelete;
+    // A scoped DELETE returns precisely one row; RLS enforces agency management,
+    // and FK ON DELETE CASCADE removes linked visits and deals atomically.
+    const ok=await run(
+      ()=>supabase.from("crm_leads").delete()
+        .eq("id",target.id).eq("agency_id",agencyId).select("id").single(),
+      "Lead excluído. Visitas e negociações vinculadas também foram removidas."
+    );
+    if(ok){
+      setLeadToDelete(null);
+      setDeleteConfirmation("");
+      setLeadDraft(null);
+    }
+  };
   const forwardLead=(id:string,agentId:string|null)=>run(
     async()=>supabase.from("crm_leads").update({assigned_agent_id:agentId}).eq("id",id).eq("agency_id",agencyId).select("id").single(),
     agentId?"Lead enviado para o corretor.":"Lead devolvido à carteira da imobiliária."
@@ -375,6 +404,11 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
                 <p className="mt-2 text-xs font-semibold text-primary">{agentNameById(l.assigned_agent_id)}</p>
                 <div className="mt-3 flex items-center gap-2">
                   <button type="button" onClick={()=>setLeadDraft({...l})} className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-muted">Editar</button>
+                  {!isBroker&&<button type="button" aria-label={"Excluir lead "+l.name} disabled={busy}
+                    onClick={()=>requestLeadDeletion(l)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-destructive/30 px-3 py-1.5 text-xs font-semibold text-destructive hover:bg-destructive/10 disabled:opacity-50">
+                    <Trash2 className="h-3.5 w-3.5"/> Excluir
+                  </button>}
                   {wa && <a aria-label={"WhatsApp de "+l.name} href={"https://wa.me/"+wa} target="_blank" rel="noreferrer" className="rounded-lg border p-2 text-primary"><MessageCircle className="h-4 w-4"/></a>}
                 </div>
                 <select aria-label={"Etapa de "+l.name} className="mt-3 w-full rounded-lg border bg-background px-2 py-2 text-xs"
@@ -523,8 +557,61 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
         <Field label="Observações"><Textarea rows={3} value={leadDraft.notes??""} onChange={e=>setLeadDraft({...leadDraft,notes:e.target.value})}/></Field>
         <Button disabled={busy} type="submit" className="w-full">{busy?"Salvando...":"Salvar lead"}</Button>
       </form>
+      {!isBroker&&leadDraft.id&&<div className="mt-5 border-t pt-4">
+        <Button type="button" variant="outline" disabled={busy}
+          className="w-full gap-2 border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={()=>{
+            const target=leads.find(l=>l.id===leadDraft.id);
+            if(target)requestLeadDeletion(target);
+          }}><Trash2 className="h-4 w-4"/> Excluir este lead</Button>
+      </div>}
     </Modal>}
 
+    {!isBroker&&leadToDelete&&<Modal title="Confirmar exclusão do lead" close={closeLeadDeletion}>
+      {(()=>{
+        const impact=leadDeletionImpact(leadToDelete.id,visits,deals);
+        return <div className="space-y-5">
+          <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive"/>
+            <div>
+              <p className="font-semibold text-destructive">Exclusão permanente</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Você está prestes a apagar <strong>{leadToDelete.name}</strong> da imobiliária <strong>{agencyName}</strong>.
+                Esta ação não pode ser desfeita pelo CRM.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl border bg-muted/40 p-4">
+            <p className="text-sm font-semibold">Dados que serão apagados junto com o lead:</p>
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+              <li>{impact.visits} visita{impact.visits===1?"":"s"} agendada{impact.visits===1?"":"s"} ou registrada{impact.visits===1?"":"s"}</li>
+              <li>{impact.deals} negociação{impact.deals===1?"":"ões"} vinculada{impact.deals===1?"":"s"}</li>
+              {impact.completedSales>0&&<li className="font-medium text-destructive">
+                {impact.completedSales} venda{impact.completedSales===1?"":"s"} concluída{impact.completedSales===1?"":"s"}:
+                {crmBRL(impact.totalSoldBrl)} sairão dos gráficos de faturamento
+              </li>}
+            </ul>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Imóveis cadastrados e outros leads não serão apagados. Caso precise preservar estes dados,
+              faça o backup da imobiliária antes de excluir.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm-delete-lead">Digite <strong>EXCLUIR</strong> para confirmar:</Label>
+            <Input id="confirm-delete-lead" autoComplete="off" spellCheck={false}
+              placeholder="EXCLUIR" value={deleteConfirmation}
+              onChange={e=>setDeleteConfirmation(e.target.value)}/>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button type="button" variant="outline" disabled={busy} onClick={closeLeadDeletion}>Cancelar</Button>
+            <Button type="button" variant="destructive" className="gap-2"
+              disabled={busy||deleteConfirmation!=="EXCLUIR"} onClick={()=>void deleteLead()}>
+              <Trash2 className="h-4 w-4"/>{busy?"Excluindo...":"Excluir lead definitivamente"}
+            </Button>
+          </div>
+        </div>;
+      })()}
+    </Modal>}
     {visitDraft&&<Modal title="Agendar visita" close={()=>setVisitDraft(null)}><form className="space-y-4" onSubmit={saveVisit}>
       <Field label="Interessado"><select required className={fieldStyle} value={visitDraft.lead_id??""} onChange={e=>{const l=leadById(e.target.value);setVisitDraft({...visitDraft,lead_id:e.target.value,property_id:l?.property_id??""});}}>
         <option value="">Selecione o lead</option>{leads.map(l=><option key={l.id} value={l.id}>{l.name}</option>)}</select></Field>

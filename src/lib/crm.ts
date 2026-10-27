@@ -74,3 +74,19 @@ export function crmMetrics(leads:Lead[],deals:Deal[],visits:Visit[],now = new Da
     upcoming:visits.filter(v=>v.status==="agendada"&&new Date(v.scheduled_at)>=now).length,
   };
 }
+
+/**
+ * Count the CRM records that will be removed by the foreign-key cascade
+ * when a specific lead is permanently deleted.
+ */
+export function leadDeletionImpact(leadId:string,visits:Visit[],deals:Deal[]){
+  const relatedVisits=visits.filter(v=>v.lead_id===leadId);
+  const relatedDeals=deals.filter(d=>d.lead_id===leadId);
+  const won=relatedDeals.filter(d=>d.status==="ganho");
+  return {
+    visits:relatedVisits.length,
+    deals:relatedDeals.length,
+    completedSales:won.length,
+    totalSoldBrl:won.reduce((amount,d)=>amount+Number(d.amount_brl||0),0),
+  };
+}
