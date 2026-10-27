@@ -88,13 +88,11 @@ export function CRMRentals({agencyId,properties,leads}:Props){
  const [manualNotes,setManualNotes]=useState("");
  const [showManual,setShowManual]=useState(false);
  const [statusFilter,setStatusFilter]=useState<"todos"|"pendente"|"recebido"|"vencido">("todos");
- const [owner,setOwner]=useState(false);
  const ownerQuery=useQuery({
    queryKey:["rental-owner",agencyId],enabled:!!agencyId,
    queryFn:async()=>{const result=await supabase.rpc("crm_is_owner",{_agency:agencyId});if(result.error)throw result.error;return !!result.data;},
  });
- // Owner permission is used only for undoing a posted receipt.
- if(owner!==!!ownerQuery.data)setOwner(!!ownerQuery.data);
+ // The owner check is authoritative for reversing a posted receipt.
  const propertiesForRent=properties.filter(p=>p.purpose==="locacao");
  const reload=()=>void qc.invalidateQueries({queryKey:["casas-rentals",agencyId]});
  async function act(fn:()=>PromiseLike<{error:{message:string}|null}>,success:string){
@@ -243,7 +241,12 @@ export function CRMRentals({agencyId,properties,leads}:Props){
      <div className="flex flex-wrap items-center justify-between gap-3">
        <h4 className="text-lg font-semibold">Controle de aluguéis</h4>
        <Button disabled={!leases.some(l=>l.status==="ativo")||busy}
-         onClick={()=>{setSelectedRental(leases.find(l=>l.status==="ativo")?.id??"");setShowManual(true);}}>
+         onClick={()=>{
+           const first=leases.find(l=>l.status==="ativo");
+           setSelectedRental(first?.id??"");
+           setManualAmount(first?String(first.monthly_rent):"");
+           setShowManual(true);
+         }}>
          <Plus className="h-4 w-4"/> Cadastrar aluguel a receber</Button>
      </div>
      <div className="flex flex-wrap gap-2">
