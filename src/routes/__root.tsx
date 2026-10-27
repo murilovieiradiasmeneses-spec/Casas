@@ -9,11 +9,12 @@ import {
   useRouterState,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader, SiteFooter } from "@/components/SiteHeader";
+import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -122,6 +123,29 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const lastUserId = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    let mounted = true;
+    const {data:{subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
+      if(!mounted)return;
+      const currentUserId=session?.user?.id??null;
+      const before=lastUserId.current;
+      lastUserId.current=currentUserId;
+      if(before===undefined||before===currentUserId)return;
+      // Authorization and CRM queries cannot survive a change of account.
+      queryClient.cancelQueries();
+      queryClient.clear();
+      void router.invalidate();
+      const path=window.location.pathname;
+      const authPages=["/entrar","/acesso-corretor","/acesso-cliente","/convite","/redefinir-senha"];
+      if(!authPages.includes(path)){
+        // A protected view of the previous account must never remain visible.
+        void router.navigate({to:"/painel",replace:true});
+      }
+    });
+    return () => {mounted=false;subscription.unsubscribe();};
+  },[queryClient,router]);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isWhiteLabel = pathname.startsWith("/v/") || pathname.startsWith("/cliente") || pathname.startsWith("/corretor");
 
