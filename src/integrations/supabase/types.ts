@@ -221,6 +221,102 @@ export type Database = {
           },
         ]
       }
+      crm_rentals: {
+        Row: {
+          id: string
+          agency_id: string
+          property_id: string
+          lead_id: string | null
+          tenant_name: string
+          tenant_phone: string
+          tenant_email: string | null
+          start_date: string
+          end_date: string | null
+          due_day: number
+          monthly_rent: number
+          status: "ativo" | "encerrado"
+          notes: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          agency_id: string
+          property_id: string
+          lead_id?: string | null
+          tenant_name: string
+          tenant_phone?: string
+          tenant_email?: string | null
+          start_date: string
+          end_date?: string | null
+          due_day: number
+          monthly_rent: number
+          status?: "ativo" | "encerrado"
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          agency_id?: string
+          property_id?: string
+          lead_id?: string | null
+          tenant_name?: string
+          tenant_phone?: string
+          tenant_email?: string | null
+          start_date?: string
+          end_date?: string | null
+          due_day?: number
+          monthly_rent?: number
+          status?: "ativo" | "encerrado"
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_rent_receivables: {
+        Row: {
+          id: string
+          agency_id: string
+          rental_id: string
+          reference_month: string
+          due_date: string
+          amount: number
+          status: "pendente" | "recebido"
+          received_at: string | null
+          notes: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          agency_id: string
+          rental_id: string
+          reference_month: string
+          due_date: string
+          amount: number
+          status?: "pendente" | "recebido"
+          received_at?: string | null
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          agency_id?: string
+          rental_id?: string
+          reference_month?: string
+          due_date?: string
+          amount?: number
+          status?: "pendente" | "recebido"
+          received_at?: string | null
+          notes?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crm_deals: {
         Row: {
           agency_id: string
@@ -849,6 +945,10 @@ export type Database = {
       }
     }
     Functions: {
+      crm_generate_rent_receivables: {
+        Args: { _rental_id: string; _first_month: string; _months: number }
+        Returns: number
+      }
       crm_my_broker_portfolios: { Args: never; Returns: {
         id:string|null;agency_id:string;name:string;agency_name:string;agency_slug:string;
         agency_active:boolean;status:string;assigned_leads:number;
