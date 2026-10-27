@@ -70,6 +70,8 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
   const [deleteConfirmation,setDeleteConfirmation]=useState("");
   const [visitDraft,setVisitDraft]=useState<Partial<Visit>|null>(null);
   const [dealDraft,setDealDraft]=useState<Partial<Deal>|null>(null);
+  const [dealToDelete,setDealToDelete]=useState<Deal|null>(null);
+  const [dealDeleteConfirmation,setDealDeleteConfirmation]=useState("");
   const [agentName,setAgentName]=useState("");
   const [agentEmail,setAgentEmail]=useState("");
   const q=useQuery({
@@ -227,16 +229,47 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
   const saveDeal=async(e:React.FormEvent)=>{
     e.preventDefault();
     if(!dealDraft?.lead_id||!dealDraft.title?.trim())return toast.error("Informe cliente e título da negociação.");
-    const amount=Number(dealDraft.amount_brl||0);
-    if(!Number.isFinite(amount)||amount<0)return toast.error("Valor inválido.");
-    const body={agency_id:agencyId,lead_id:dealDraft.lead_id,
+    const lead=leadById(dealDraft.lead_id);
+    if(!lead)return toast.error("Lead não pertence à sua carteira.");
+    const amount=Number(dealDraft.amount_brl);
+    if(dealDraft.amount_brl==null||!Number.isFinite(amount)||amount<0||Math.round(amount*100)/100!==amount)
+      return toast.error("Informe um valor válido em reais, com até duas casas decimais.");
+    const body={agency_id:agencyId,lead_id:lead.id,
       property_id:dealDraft.property_id||null,title:dealDraft.title.trim(),
       amount_brl:amount,status:dealDraft.status??"proposta",
       expected_close_date:dealDraft.expected_close_date||null,
-      closed_at:dealDraft.status==="ganho"?new Date().toISOString():null,
+      closed_at:dealDraft.status==="ganho"?(dealDraft.closed_at||new Date().toISOString()):null,
       notes:dealDraft.notes??""};
-    const ok=await run(()=>supabase.from("crm_deals").insert(body),"Negociação registrada.");
+    const editing=!!dealDraft.id;
+    const ok=await run(()=>(editing
+      ? supabase.from("crm_deals").update(body).eq("id",dealDraft.id!).eq("agency_id",agencyId)
+      : supabase.from("crm_deals").insert(body)
+    ).select("id").single(),editing?"Negociação atualizada. Os gráficos foram recalculados.":"Negociação registrada.");
     if(ok)setDealDraft(null);
+  };
+  const requestDealDeletion=(deal:Deal)=>{
+    if(!canManageTeam)return;
+    setDealDraft(null);
+    setDealToDelete(deal);
+    setDealDeleteConfirmation("");
+  };
+  const closeDealDeletion=()=>{
+    if(busy)return;
+    setDealToDelete(null);
+    setDealDeleteConfirmation("");
+  };
+  const deleteDeal=async()=>{
+    if(!canManageTeam||!dealToDelete||dealDeleteConfirmation!=="EXCLUIR"||busy)return;
+    const selected=dealToDelete;
+    const ok=await run(
+      ()=>supabase.from("crm_deals").delete().eq("id",selected.id)
+        .eq("agency_id",agencyId).select("id").single(),
+      "Negociação excluída. Os indicadores e gráficos foram atualizados."
+    );
+    if(ok){
+      setDealToDelete(null);
+      setDealDeleteConfirmation("");
+    }
   };
   const addAgent=async(e:React.FormEvent)=>{
     e.preventDefault();
@@ -467,10 +500,21 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
           <p className="mt-1 text-sm text-muted-foreground">{leadById(d.lead_id)?.name??"Lead"} · {propertyName(d.property_id)}</p>
           <p className="mt-1 text-base font-bold">{crmBRL(d.amount_brl)}</p>
         </div>
-        <select aria-label="Situação da negociação" className={fieldStyle+" max-w-44"} value={d.status} disabled={busy}
-          onChange={e=>void updateDeal(d,e.target.value as DealStage)}>
-          {DEAL_STAGES.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
+        <div className="flex flex-wrap items-center gap-2">
+          <select aria-label={"Situação da negociação "+d.title} className={fieldStyle+" max-w-44"} value={d.status} disabled={busy}
+            onChange={e=>void updateDeal(d,e.target.value as DealStage)}>
+            {DEAL_STAGES.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+          </select>
+          <Button type="button" size="sm" variant="outline" disabled={busy}
+            onClick={()=>setDealDraft({...d})}>
+            <CircleDollarSign className="h-4 w-4"/> Editar valor
+          </Button>
+          {canManageTeam&&<Button type="button" size="sm" variant="outline" disabled={busy}
+            className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+            onClick={()=>requestDealDeletion(d)}>
+            <Trash2 className="h-4 w-4"/> Excluir
+          </Button>}
+        </div>
       </div>):<p className="py-12 text-center text-muted-foreground">Nenhuma negociação registrada.</p>}</div>
     </div>}
 
@@ -657,7 +701,7 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
       <Button type="submit" disabled={busy} className="w-full">Salvar visita</Button>
     </form></Modal>}
 
-    {dealDraft&&<Modal title="Registrar negociação" close={()=>setDealDraft(null)}><form className="space-y-4" onSubmit={saveDeal}>
+    {dealDraft&&<Modal title={dealDraft.id?"Editar negociação":"Registrar negociação"} close={()=>{if(!busy)setDealDraft(null);}}><form className="space-y-4" onSubmit={saveDeal}>
       <Field label="Nome da negociação"><Input required value={dealDraft.title??""} onChange={e=>setDealDraft({...dealDraft,title:e.target.value})} placeholder="Venda do imóvel no Jardim..."/></Field>
       <Field label="Lead interessado"><select className={fieldStyle} required value={dealDraft.lead_id??""} onChange={e=>{const l=leadById(e.target.value);setDealDraft({...dealDraft,lead_id:e.target.value,property_id:l?.property_id??null});}}>
         <option value="">Selecione o lead</option>{leads.map(l=><option key={l.id} value={l.id}>{l.name}</option>)}</select></Field>
@@ -668,8 +712,45 @@ export function CRMWorkspace({agencyId,agencyName,agencySlug="",isMaster=false,i
         <Field label="Previsão de fechamento"><Input type="date" value={dealDraft.expected_close_date??""} onChange={e=>setDealDraft({...dealDraft,expected_close_date:e.target.value||null})}/></Field>
       </div>
       <Field label="Observações"><Textarea rows={3} value={dealDraft.notes??""} onChange={e=>setDealDraft({...dealDraft,notes:e.target.value})}/></Field>
-      <Button type="submit" disabled={busy} className="w-full">Salvar negociação</Button>
+      {dealDraft.id&&dealDraft.status==="ganho"&&<p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950">
+        A alteração do valor de uma venda concluída atualizará o faturamento e os relatórios do CRM.
+      </p>}
+      <Button type="submit" disabled={busy} className="w-full">{busy?"Salvando...":dealDraft.id?"Salvar alterações":"Salvar negociação"}</Button>
     </form></Modal>}
+
+    {canManageTeam&&dealToDelete&&<Modal title="Excluir negociação" close={closeDealDeletion}>
+      <div className="space-y-5">
+        <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive"/>
+          <div>
+            <p className="font-semibold text-destructive">Exclusão permanente</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Deseja apagar a negociação <strong>{dealToDelete.title}</strong> de <strong>{agencyName}</strong>?
+              O valor registrado é <strong>{crmBRL(dealToDelete.amount_brl)}</strong>.
+            </p>
+          </div>
+        </div>
+        <p className="rounded-xl border bg-muted/40 p-4 text-sm text-muted-foreground">
+          {dealToDelete.status==="ganho"
+            ? "Esta é uma venda concluída. Excluí-la removerá o valor dos gráficos de faturamento e do histórico de vendas."
+            : "A negociação será removida dos indicadores comerciais e do histórico."}
+          {" "}O lead e o imóvel permanecerão cadastrados. Não é possível desfazer esta ação pelo CRM.
+        </p>
+        <div className="space-y-2">
+          <Label htmlFor="confirm-delete-deal">Digite <strong>EXCLUIR</strong> para confirmar:</Label>
+          <Input id="confirm-delete-deal" autoComplete="off" spellCheck={false}
+            placeholder="EXCLUIR" value={dealDeleteConfirmation}
+            onChange={e=>setDealDeleteConfirmation(e.target.value)}/>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Button type="button" variant="outline" disabled={busy} onClick={closeDealDeletion}>Cancelar</Button>
+          <Button type="button" variant="destructive" disabled={busy||dealDeleteConfirmation!=="EXCLUIR"}
+            onClick={()=>void deleteDeal()}>
+            <Trash2 className="h-4 w-4"/>{busy?"Excluindo...":"Excluir negociação definitivamente"}
+          </Button>
+        </div>
+      </div>
+    </Modal>}
   </section>;
 }
 
