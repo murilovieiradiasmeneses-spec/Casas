@@ -47,5 +47,5 @@ export function rentalBRL(value:number|string|null|undefined){
   return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(value??0));
 }
 export function validRentalMoney(raw:number):boolean {
-  return Number.isFinite(raw) && raw>0 && raw<=9999999999 && Math.round(raw*100)===raw*100;
+  return Number.isFinite(raw) && raw>0 && raw<=9999999999 && Math.abs(Math.round(raw*100)-raw*100)<0.00001;
 }
