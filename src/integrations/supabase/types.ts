@@ -849,6 +849,10 @@ export type Database = {
       }
     }
     Functions: {
+      crm_my_broker_portfolios: { Args: never; Returns: {
+        id:string|null;agency_id:string;name:string;agency_name:string;agency_slug:string;
+        agency_active:boolean;status:string;assigned_leads:number;
+      }[] }
       master_change_agency_login: { Args: { _agency: string; _old_user: string; _new_email: string }; Returns: string }
       activate_agency_login_change: { Args: { _agency: string }; Returns: boolean }
       master_list_agency_login_changes: {
