@@ -70,6 +70,10 @@ export async function downloadCompanyBackup(
     paginate((a,b)=>supabase.from("crm_salespeople").select("*").eq("agency_id",agencyId).order("id").range(a,b)),
     paginate((a,b)=>supabase.from("crm_settings").select("*").eq("agency_id",agencyId).range(a,b)),
   ]);
+  const [rentalContracts,rentReceivables]=await Promise.all([
+    paginate((a,b)=>supabase.from("crm_rentals").select("*").eq("agency_id",agencyId).order("id").range(a,b)),
+    paginate((a,b)=>supabase.from("crm_rent_receivables").select("*").eq("agency_id",agencyId).order("id").range(a,b)),
+  ]);
   const {data:authorizations,error:authError}=await supabase.rpc("crm_list_authorized_brokers",{_agency:agencyId});
   if(authError)throw Error(authError.message);
 
@@ -108,6 +112,7 @@ export async function downloadCompanyBackup(
     details:"Exportação completa dos registros disponíveis ao proprietário no momento do download.",
     agency,properties,property_images:images,
     crm_leads:leads,crm_visits:visits,crm_deals:deals,
+    crm_rentals:rentalContracts,crm_rent_receivables:rentReceivables,
     crm_salespeople:brokers,crm_settings:settings,
     broker_authorizations:authorizations??[],
     ...(billing!==null?{agency_billing:billing}:{}),
@@ -122,7 +127,8 @@ export async function downloadCompanyBackup(
     "Frequência escolhida: "+cadence,
     "",
     "Este é um backup completo do momento do download (não apenas alterações recentes).",
-    "backup.json contém os imóveis, imagens (metadados), CRM, equipe e identidade visual.",
+    "backup.json contém os imóveis, imagens (metadados), CRM, equipe, contratos de locação,",
+    "mensalidades/recebimentos de aluguel e identidade visual.",
     "A pasta midia inclui as imagens baixadas do armazenamento CASAS.",
     "O arquivo contém dados pessoais de leads e corretores: guarde-o com segurança.",
     "NUNCA publique o ZIP nem envie a terceiros sem autorização.",
