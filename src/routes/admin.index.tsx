@@ -37,17 +37,30 @@ function Dashboard() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { data: imgs } = await supabase.from("property_images").select("storage_path").eq("property_id", id);
-      const paths = (imgs ?? []).map((i) => i.storage_path).filter((p): p is string => !!p);
-      if (paths.length) await supabase.storage.from(BUCKET).remove(paths);
-      const { error } = await supabase.from("properties").delete().eq("id", id).eq("agency_id", activeAgencyId);
+      const { data: imgs, error: imageError } = await supabase.from("property_images")
+        .select("storage_path").eq("property_id", id);
+      if (imageError) throw imageError;
+      // Delete the database record first: images and linked history must not be
+      // lost if the database refuses deletion (e.g. active rental contract).
+      const { data: removed, error } = await supabase.from("properties")
+        .delete().eq("id", id).eq("agency_id", activeAgencyId).select("id").single();
       if (error) throw error;
+      if (!removed) throw Error("Imóvel não encontrado ou sem permissão para exclusão.");
+      const paths = (imgs ?? []).map((i) => i.storage_path).filter((p): p is string => !!p);
+      if (paths.length) {
+        const { error: storageError } = await supabase.storage.from(BUCKET).remove(paths);
+        if (storageError) toast.warning("Imóvel excluído, mas algumas fotos precisam de limpeza no armazenamento.");
+      }
     },
     onSuccess: () => {
       toast.success("Imóvel excluído.");
       qc.invalidateQueries({ queryKey: ["admin-properties", activeAgencyId] });
     },
-    onError: () => toast.error("Não foi possível excluir."),
+    onError: (error) => toast.error(
+      (error as Error).message?.includes("foreign key") || (error as Error).message?.includes("violates foreign key")
+        ? "Este imóvel possui um contrato de locação vinculado. Encerre o contrato antes de excluir."
+        : "Não foi possível excluir: " + (error as Error).message
+    ),
   });
 
   const list = q.data ?? [];
@@ -98,7 +111,7 @@ function Dashboard() {
                   <AlertDialog>
                     <AlertDialogTrigger asChild><Button size="icon" variant="ghost" aria-label="Excluir"><Trash2 /></Button></AlertDialogTrigger>
                     <AlertDialogContent>
-                      <AlertDialogHeader><AlertDialogTitle>Excluir imóvel?</AlertDialogTitle><AlertDialogDescription>"{p.title}" e suas fotos serão removidos permanentemente.</AlertDialogDescription></AlertDialogHeader>
+                      <AlertDialogHeader><AlertDialogTitle>Excluir imóvel?</AlertDialogTitle><AlertDialogDescription>"{p.title}" e suas fotos serão removidos permanentemente. Leads, visitas e negociações permanecerão no CRM, sem o vínculo com este imóvel. Imóveis com contrato de locação exigem encerramento do contrato antes da exclusão.</AlertDialogDescription></AlertDialogHeader>
                       <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => remove.mutate(p.id)}>Excluir</AlertDialogAction></AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
